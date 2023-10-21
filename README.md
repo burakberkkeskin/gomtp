@@ -4,8 +4,10 @@ Gompt is a cli tool to test smtp settings easily.
 
 ## Install
 
+```bash
 sudo curl -L -o /usr/local/bin/gomtp "https://github.com/safderun/gomtp/releases/latest/download/gomtp-$(uname -s)-$(uname -m)" && \
 sudo chmod +x /usr/local/bin/gomtp
+```
 
 ## Usage
 
