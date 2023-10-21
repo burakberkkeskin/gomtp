@@ -34,9 +34,11 @@ func checkVersion() {
 
 func main() {
 
-	if os.Args[1] == "--version" {
-		checkVersion()
-		os.Exit(0)
+	if len(os.Args) > 1 {
+		if os.Args[1] == "--version" {
+			checkVersion()
+			os.Exit(0)
+		}
 	}
 
 	// Read the YAML configuration file
