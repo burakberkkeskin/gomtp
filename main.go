@@ -29,7 +29,7 @@ var version string
 var commitId string
 
 func checkVersion() {
-	fmt.Println("gompt version ", version, " ", commitId)
+	fmt.Println("gomtp version ", version, " ", commitId)
 }
 
 func main() {
@@ -59,7 +59,7 @@ func main() {
 	}
 
 	if emailConfig.Body == "" {
-		emailConfig.Body = "This is the test email sent by gompt."
+		emailConfig.Body = "This is the test email sent by gomtp."
 	}
 
 	// Create the email message
