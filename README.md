@@ -1,6 +1,6 @@
 ## 📬 GOMTP
 
-Gompt is a cli tool to test smtp settings easily.
+Gomtp is a cli tool to test smtp settings easily.
 
 ## Install
 
@@ -18,7 +18,7 @@ sudo chmod +x /usr/local/bin/gomtp
 - In the same directory with your configured `gomtp.yml`, run `gomtp` with no argument.
 
 ```bash
-❯ gompt
+❯ gomtp
 Email sent successfully!
 ```
 
