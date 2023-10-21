@@ -25,11 +25,12 @@ type EmailConfig struct {
 	Body     string `yaml:"body"`
 }
 
-var version string
+var version = "abcd"
 var commitId string
 
 func checkVersion() {
-	fmt.Println("gomtp version ", version, " ", commitId)
+	fmt.Println(version)
+	fmt.Printf("gomtp version %s, %s", version, commitId)
 }
 
 func main() {

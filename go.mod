@@ -1,4 +1,4 @@
-module gompt
+module gomtp
 
 go 1.21.1
 
