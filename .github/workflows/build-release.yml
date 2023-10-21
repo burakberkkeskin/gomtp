@@ -38,10 +38,10 @@ jobs:
       - name: Binary Build
         run: |
           mkdir build
-          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags "-X gomtp/main.version=$version -X gomtp/cmd.main=$commitId" -o build/gomtp-Linux-x86_64 -v .
-          CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -ldflags "-X gomtp/main.version=$version -X gomtp/cmd.main=$commitId" -o build/gomtp-Linux-arm64 -v .
-          CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -ldflags "-X gomtp/main.version=$version -X gomtp/cmd.main=$commitId" -o build/gomtp-Darwin-x86_64 -v . 
-          CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -ldflags "-X gomtp/main.version=$version -X gomtp/cmd.main=$commitId" -o build/gomtp-Darwin-arm64 -v .
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags "-X gomtp/main.version=$version -X gomtp/main.commitId=$commitId" -o build/gomtp-Linux-x86_64 -v .
+          CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -ldflags "-X gomtp/main.version=$version -X gomtp/main.commitId=$commitId" -o build/gomtp-Linux-arm64 -v .
+          CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -ldflags "-X gomtp/main.version=$version -X gomtp/main.commitId=$commitId" -o build/gomtp-Darwin-x86_64 -v . 
+          CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -ldflags "-X gomtp/main.version=$version -X gomtp/main.commitId=$commitId" -o build/gomtp-Darwin-arm64 -v .
         env:
           version: ${{ steps.metadata.outputs.version }}
           commitId: ${{ steps.metadata.outputs.commitId }}
