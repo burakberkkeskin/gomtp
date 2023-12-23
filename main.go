@@ -25,8 +25,9 @@ type EmailConfig struct {
 	Body     string `yaml:"body"`
 }
 
-var version = "abcd"
+var version string
 var commitId string
+var gomtpYamlFilePath = "gomtp.yaml"
 
 func checkVersion() {
 	fmt.Println(version)
@@ -34,16 +35,17 @@ func checkVersion() {
 }
 
 func main() {
-
 	if len(os.Args) > 1 {
 		if os.Args[1] == "--version" {
 			checkVersion()
 			os.Exit(0)
+		} else {
+			gomtpYamlFilePath = os.Args[1]
 		}
 	}
 
 	// Read the YAML configuration file
-	configFile, err := os.ReadFile("gomtp.yml")
+	configFile, err := os.ReadFile(gomtpYamlFilePath)
 	if err != nil {
 		log.Fatal(err)
 	}
