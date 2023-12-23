@@ -11,11 +11,11 @@ sudo chmod +x /usr/local/bin/gomtp
 
 ## Usage
 
-- Create a `gomtp.yml` file anywhre you want.
-- Take the template from the `gomtp.yml`
+- Create a `gomtp.yaml` file anywhre you want.
+- Take the template from the `gomtp.yaml`
 - There is 4 templates for `mailhog`, `gmail`, `yandex` and `brevo`
 - `subject` and `body` is optional.
-- In the same directory with your configured `gomtp.yml`, run `gomtp` with no argument.
+- In the same directory with your configured `gomtp.yaml`, run `gomtp` with no argument.
 
 ```bash
 ❯ gomtp
@@ -23,6 +23,16 @@ Email sent successfully!
 ```
 
 - If your configuration is valid, you will see the "Email sent successfully!" message.
+
+## Custom Gomtp Yaml Path
+
+- You can name the `gomtp.yaml` as you wish while creating the configuration.
+
+- If you change the default configuration file name, you can pass the path of the file to the `gomtp`.
+
+```bash
+gomtp test.yaml
+```
 
 ## Sample SMTP For Testing
 
@@ -32,6 +42,11 @@ Email sent successfully!
 docker compose up -d
 ```
 
-- Configure `gomtp.yml`
+- Configure `gomtp.yaml`
+  - The default `gomtp.yaml` file has been configured for the mailhog.
 - Open the `mailhog` web ui from http://127.0.0.1:8025
 - Run the `gomtp`.
+
+```bash
+gomtp
+```

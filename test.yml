@@ -1,0 +1,63 @@
+##### Mailhog Example #####
+#
+username: ''
+password: ''
+from: 'from@example.com'
+to: 'to@example.com'
+host: '127.0.0.1'
+port: 1025
+ssl: false
+tls: false
+auth: 'NO'
+subject: 'Testing Email'
+body: |
+  this is line 1
+  This is line 2
+
+##### Gmail Example #####
+#
+# username: 'from@gmail.com'
+# password: 'appPassword'
+# from: 'from@gmail.com'
+# to: 'to@example.com'
+# host: 'smtp.gmail.com'
+# port: 587
+# ssl: false
+# tls: true
+# auth: 'LOGIN'
+# subject: 'Testing Email'
+# body: |
+#   this is line 1
+#   This is line 2
+
+##### Yandex Example #####
+#
+# username: 'example@yandex.com'
+# password: 'superSecretPassword'
+# from: 'example@yandex.com'
+# to: 'example@test.com'
+# host: 'smtp.yandex.com'
+# port: 465
+# ssl: true
+# tls: false
+# auth: 'LOGIN'
+# subject: 'Testing Email'
+# body: |
+#   this is line 1
+#   This is line 2
+
+##### Brevo Example #####
+#
+# username: 'user@example.com'
+# password: 'superSecretPassword'
+# from: 'from@example.com'
+# to: 'to@example.com'
+# host: 'smtp-relay.brevo.com'
+# port: 587
+# ssl: false
+# tls: true
+# auth: 'LOGIN'
+# subject: 'Testing Email'
+# body: |
+#   this is line 1
+#   This is line 2
