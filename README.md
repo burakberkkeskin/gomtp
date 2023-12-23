@@ -31,7 +31,13 @@ Email sent successfully!
 - If you change the default configuration file name, you can pass the path of the file to the `gomtp`.
 
 ```bash
-gomtp test.yaml
+gomtp --file test.yaml
+```
+
+or
+
+```bash
+gomtp -f test.yaml
 ```
 
 ## Sample SMTP For Testing
