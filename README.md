@@ -4,9 +4,23 @@ Gomtp is a cli tool to test smtp settings easily.
 
 ## Install
 
+### Install From Binary (Recommended)
+
+You can install the `gomtp` to Linux or macOS with these commands:
+
 ```bash
 sudo curl -L -o /usr/local/bin/gomtp "https://github.com/safderun/gomtp/releases/latest/download/gomtp-$(uname -s)-$(uname -m)" && \
 sudo chmod +x /usr/local/bin/gomtp
+```
+
+### Build Locally
+
+You can build the `gomtp` locally, on your own machine.
+
+```bash
+version=$(git describe --tags --abbrev=0) && \
+commitId=$(git rev-parse --short $version) && \
+go build -ldflags "-X gomtp/cmd.version=$version -X gomtp/cmd.commitId=$commitId" -o gomtp -v .
 ```
 
 ## Usage
