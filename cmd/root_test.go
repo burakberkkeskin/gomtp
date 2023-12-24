@@ -90,3 +90,28 @@ func TestInvalidSSLConfiguration(t *testing.T) {
 func TestNonTLSServerWithTLSConfiguration(t *testing.T) {
 
 }
+
+func TestOptionalParameters(t *testing.T) {
+	command := rootCmd
+	command.SetArgs([]string{
+		"--file", "./tests/gomtpYamls/optionalParameters.yaml",
+	})
+	b := bytes.NewBufferString("")
+	command.SetOut(b)
+	command.SetErr(b)
+	command.Execute()
+	var expected string = "Email sent successfully!"
+	assert.Equal(t, expected, b.String(), "actual is not expected")
+}
+
+func TestInvalidYaml(t *testing.T) {
+	command := rootCmd
+	command.SetArgs([]string{
+		"--file", "./tests/gomtpYamls/invalid.yaml",
+	})
+	b := bytes.NewBufferString("")
+	command.SetOut(b)
+	command.SetErr(b)
+	err := command.Execute()
+	assert.NotEmpty(t, err)
+}

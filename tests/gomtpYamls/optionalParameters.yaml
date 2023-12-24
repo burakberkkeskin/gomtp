@@ -1,0 +1,9 @@
+username: ''
+password: ''
+from: 'from@example.com'
+to: 'to@example.com'
+host: '127.0.0.1'
+port: 1025
+ssl: false
+tls: false
+auth: 'NO'
