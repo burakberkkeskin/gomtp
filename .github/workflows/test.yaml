@@ -18,5 +18,12 @@ jobs:
       - name: Run Dependencies
         run: docker compose up -d
 
+      - name: Compile the Test
+        run: go test -coverprofile=coverage.out -c -o gomtp.test ./cmd/
+
       - name: Test the Application
-        run: go test -c -o gomtp.test ./cmd && ./gomtp.test
+        run: ./gomtp.test -test.coverprofile ./c.out | tee testCoverage.out
+
+      - name: Check Coverage If Higher Than 80
+        run: |
+          coverage=$(grep -oP 'coverage: \K\d+\.\d+' testCoverage.out) expr $coverage '>' 80
