@@ -1,0 +1,13 @@
+username:''
+password:''
+from:'from@example.com'
+to:'to@example.com'
+host:'127.0.0.1'
+port:1025
+ssl:false
+tlsfalse
+auth: 'NO'
+subject: 'Testing Email'
+body: |
+  this is line 1
+  This is line 2
