@@ -70,3 +70,11 @@ docker compose up -d
 ```bash
 gomtp
 ```
+
+## Run Tests
+
+- You can run e2e tests to ensure application stability.
+
+```bash
+go test -c -o gomtp.test ./cmd && ./gomtp.test
+```
