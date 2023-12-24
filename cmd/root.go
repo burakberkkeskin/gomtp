@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"crypto/tls"
-	"log"
 	"net/smtp"
 	"os"
 
@@ -44,12 +43,12 @@ func rootRun(cmd *cobra.Command, args []string) error {
 	// Read the YAML configuration file
 	configFile, err := os.ReadFile(gomtpYamlPath)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	var emailConfig EmailConfig
 	err = yaml.Unmarshal(configFile, &emailConfig)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	// Set default values for subject and body if they are empty
 	if emailConfig.Subject == "" {
