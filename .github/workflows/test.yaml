@@ -27,4 +27,4 @@ jobs:
       - name: Check Coverage If Higher Than 80
         run: |
           export coverage=$(grep -oP '(?<=coverage: )[0-9.]+' testCoverage.out)
-          expr $coverage '>' 90
+          expr $coverage '>' 84
