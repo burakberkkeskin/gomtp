@@ -32,7 +32,7 @@ type EmailConfig struct {
 }
 
 // RootCmd represents the base command when called without any subcommands
-var RootCmd = &cobra.Command{
+var rootCmd = &cobra.Command{
 	Use:     "gomtp",
 	Short:   "Test SMTP Settings",
 	Long:    `gomtp is a CLI tool for go that tests SMTP settings easily.`,
@@ -95,22 +95,14 @@ func rootRun(cmd *cobra.Command, args []string) error {
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
-	RootCmd.SilenceUsage = true
-	err := RootCmd.Execute()
+	rootCmd.SilenceUsage = true
+	err := rootCmd.Execute()
 	if err != nil {
 		os.Exit(1)
 	}
 }
 
 func init() {
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
-
-	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.gomtp.yaml)")
-
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	RootCmd.Flags().BoolP("help", "h", false, "Help menu.")
-	RootCmd.Flags().StringVarP(&gomtpYamlPath, "file", "f", "gomtp.yaml", "Configuration file path.")
+	rootCmd.Flags().BoolP("help", "h", false, "Help menu.")
+	rootCmd.Flags().StringVarP(&gomtpYamlPath, "file", "f", "gomtp.yaml", "Configuration file path.")
 }
