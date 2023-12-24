@@ -2,8 +2,6 @@ package cmd
 
 import (
 	"crypto/tls"
-	"fmt"
-	"log"
 	"net/smtp"
 	"os"
 
@@ -32,25 +30,25 @@ type EmailConfig struct {
 	Body     string `yaml:"body"`
 }
 
-// rootCmd represents the base command when called without any subcommands
+// RootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:     "gomtp",
 	Short:   "Test SMTP Settings",
 	Long:    `gomtp is a CLI tool for go that tests SMTP settings easily.`,
 	Version: version + " " + commitId,
-	Run:     rootRun,
+	RunE:    rootRun,
 }
 
-func rootRun(cmd *cobra.Command, args []string) {
+func rootRun(cmd *cobra.Command, args []string) error {
 	// Read the YAML configuration file
 	configFile, err := os.ReadFile(gomtpYamlPath)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	var emailConfig EmailConfig
 	err = yaml.Unmarshal(configFile, &emailConfig)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	// Set default values for subject and body if they are empty
 	if emailConfig.Subject == "" {
@@ -87,15 +85,16 @@ func rootRun(cmd *cobra.Command, args []string) {
 
 	// Send the email
 	if err := d.DialAndSend(m); err != nil {
-		log.Fatal(err)
+		return err
 	}
-	fmt.Println("Email sent successfully!")
-
+	cmd.Printf("Email sent successfully!")
+	return nil
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
+	rootCmd.SilenceUsage = true
 	err := rootCmd.Execute()
 	if err != nil {
 		os.Exit(1)
@@ -103,14 +102,6 @@ func Execute() {
 }
 
 func init() {
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
-
-	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.gomtp.yaml)")
-
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
 	rootCmd.Flags().BoolP("help", "h", false, "Help menu.")
 	rootCmd.Flags().StringVarP(&gomtpYamlPath, "file", "f", "gomtp.yaml", "Configuration file path.")
 }
