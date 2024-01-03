@@ -1,5 +1,5 @@
 ## 📬 GOMTP
-
+readme update
 Gomtp is a cli tool to test smtp settings easily.
 
 ## Install
