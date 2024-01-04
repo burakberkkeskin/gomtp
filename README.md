@@ -71,6 +71,26 @@ docker compose up -d
 gomtp
 ```
 
+## Release a version
+
+- You should create a release branch from the master
+
+```bash
+git checkout -b release/v1.2.0
+```
+
+- Tag the commit
+
+```bash
+git tag --sign v1.2.0 -m "Added template subcommand"
+```
+
+- Push the release branch and tags
+
+```bash
+git push && git push --tags
+```
+
 ## Run Tests
 
 - Before run the tests, run the docker compose file.
