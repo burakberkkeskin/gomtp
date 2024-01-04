@@ -73,6 +73,12 @@ gomtp
 
 ## Run Tests
 
+- Before run the tests, run the docker compose file.
+
+```bash
+docker compose up -d
+```
+
 - You can run e2e tests to ensure application stability.
 
 ```bash
@@ -84,7 +90,7 @@ go test -c -o gomtp.test ./cmd/ \
 
 ```bash
 go test -coverprofile=coverage.out -c -o gomtp.test ./cmd/ \
-&& ./gomtp.test -test.coverprofile ./c.out | tee testCoverage.out
+&& ./gomtp.test -test.coverprofile ./c.out
 ```
 
 - You can see covered lines with html report:
