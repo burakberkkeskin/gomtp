@@ -1,0 +1,13 @@
+username: ''
+password: ''
+from: 'from@example.com'
+to: 'to@example.com'
+host: '127.0.0.1'
+port: 465
+ssl: false
+tls: false
+auth: 'NO' # You can 'LOGIN' if smtp needs auth.
+subject: 'Testing Email'
+body: |
+  this is line 1
+  This is line 2
