@@ -76,5 +76,21 @@ gomtp
 - You can run e2e tests to ensure application stability.
 
 ```bash
-go test -c -o gomtp.test ./cmd && ./gomtp.test
+go test -c -o gomtp.test ./cmd/ \
+&& ./gomtp.test
+```
+
+- Check the test coverage:
+
+```bash
+go test -coverprofile=coverage.out -c -o gomtp.test ./cmd/ \
+&& ./gomtp.test -test.coverprofile ./c.out | tee testCoverage.out
+```
+
+- You can see covered lines with html report:
+
+```bash
+go test -coverprofile=coverage.out -c -o gomtp.test ./cmd/ \
+&& ./gomtp.test -test.coverprofile ./c.out \
+&& go tool cover -html=c.out
 ```
