@@ -2,8 +2,6 @@ package cmd
 
 import (
 	_ "embed"
-	"fmt"
-	"log"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -20,10 +18,9 @@ var templateCmd = &cobra.Command{
 }
 
 func templateCmdFunction(cmd *cobra.Command, args []string) error {
-	fmt.Println("Template creating")
 	err := os.WriteFile(gomtpTemplatePath, gomtpYamlTmpl, 0644)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	return nil
 }
