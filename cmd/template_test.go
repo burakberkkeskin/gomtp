@@ -136,6 +136,22 @@ func TestBrevoTemplateProvider(t *testing.T) {
 	os.Remove(customYamlPath)
 }
 
+func TestInvalidTemplateProvider(t *testing.T) {
+	command := rootCmd
+	customYamlPath := "./test.yaml"
+	command.SetArgs([]string{
+		"template",
+		"--output", customYamlPath,
+		"--provider", "example",
+	})
+	b := bytes.NewBufferString("")
+	command.SetOut(b)
+	command.SetErr(b)
+	err := command.Execute()
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "provider can be one of these")
+}
+
 // run with --output /etc/gomtp.yaml and check if exit code is non zero
 func TestPermissionErrorPathTemplateCommand(t *testing.T) {
 
