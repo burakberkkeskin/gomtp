@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-//go:embed gomtp.yaml
+//go:embed embeddedFiles/gomtp.yaml
 var gomtpYamlTmpl []byte
 var gomtpTemplatePath string
 
