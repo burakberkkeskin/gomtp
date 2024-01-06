@@ -53,6 +53,9 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           sinceTag: ${{ steps.metadata.outputs.previousTag }}
 
+      - name: 'Check changelog'
+        run: cat CHANGELOG.md
+
       - name: Release
         if: steps.metadata.outputs.releaseBinary == 'true'
         uses: softprops/action-gh-release@v1
