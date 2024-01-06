@@ -54,7 +54,12 @@ jobs:
           sinceTag: ${{ steps.metadata.outputs.previousTag }}
 
       - name: 'Check changelog'
-        run: cat CHANGELOG.md
+        run: |
+          changelogFile="CHANGELOG.md"
+          sed -i "s/Unreleased/$tag/g" $changelogFile
+          sed -i 's#https://github.com/safderun/gomtp/compare/$tag...HEAD#https://github.com/safderun/gomtp/tree/$tag#g' "$changelogFile"
+        env:
+          tag: ${{ steps.metadata.outputs.previousTag }}
 
       - name: Release
         if: steps.metadata.outputs.releaseBinary == 'true'
