@@ -55,7 +55,7 @@ func checkProvider(providerName string) ([]byte, error) {
 	case "brevo":
 		return brevoGomtpYamlTmpl, nil
 	default:
-		return nil, errors.New("provider can be one of these: gomtp | gmail | yandex | brevo")
+		return nil, errors.New("provider can be one of these: mailhog | gmail | yandex | brevo")
 	}
 }
 
