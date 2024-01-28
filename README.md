@@ -73,16 +73,23 @@ gomtp
 
 ## Release a version
 
+- Define a version.
+
+```bash
+export gomtpVersion=v1.4.0
+```
+
 - You should create a release branch from the master
 
 ```bash
-git checkout -b release/v1.2.0
+git checkout master && git pull && \
+git checkout -b release/${gomtpVersion}
 ```
 
 - Tag the commit
 
 ```bash
-git tag --sign v1.2.0 -m "Added template subcommand"
+git tag --sign ${gomtpVersion} -m "Added verifyCertificate and example commands."
 ```
 
 - Push the release branch and tags
