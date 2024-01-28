@@ -17,17 +17,18 @@ var version string
 var commitId string
 
 type EmailConfig struct {
-	Username string `yaml:"username"`
-	Password string `yaml:"password"`
-	From     string `yaml:"from"`
-	To       string `yaml:"to"`
-	Host     string `yaml:"host"`
-	Port     int    `yaml:"port"`
-	SSL      bool   `yaml:"ssl"`
-	TLS      bool   `yaml:"tls"`
-	Auth     string `yaml:"auth"`
-	Subject  string `yaml:"subject"`
-	Body     string `yaml:"body"`
+	Username          string `yaml:"username"`
+	Password          string `yaml:"password"`
+	From              string `yaml:"from"`
+	To                string `yaml:"to"`
+	Host              string `yaml:"host"`
+	Port              int    `yaml:"port"`
+	SSL               bool   `yaml:"ssl"`
+	TLS               bool   `yaml:"tls"`
+	Auth              string `yaml:"auth"`
+	VerifyCertificate bool   `default:"true" yaml:"verifyCertificate"`
+	Subject           string `yaml:"subject"`
+	Body              string `yaml:"body"`
 }
 
 // RootCmd represents the base command when called without any subcommands
@@ -73,7 +74,7 @@ func rootRun(cmd *cobra.Command, args []string) error {
 
 	tlsConfig := &tls.Config{
 		ServerName:         emailConfig.Host,
-		InsecureSkipVerify: !emailConfig.TLS,
+		InsecureSkipVerify: emailConfig.VerifyCertificate,
 	}
 	d.TLSConfig = tlsConfig
 
