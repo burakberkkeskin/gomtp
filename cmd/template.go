@@ -25,9 +25,19 @@ var (
 	providerName      string
 )
 
+const templateUsageMessage = `Example commands:
+  gomtp template # Create a file named gomtp.yaml filled with configuration for mailhog.
+  gomtp template -o custom.yaml # Create a file named custom.yaml filled with configuration for mailhog.
+  gomtp template -p gmail # Create a file named gomtp.yaml filled with configuration for gmail.
+  gomtp template -p yandex # Create a file named gomtp.yaml filled with configuration for gmail.
+  gomtp template -p brevo # Create a file named gomtp.yaml filled with configuration for brevo.
+  gomtp template -p brevo -o custom.yaml # Create a file named custom.yaml filled with configuration for gmail.
+`
+
 var templateCmd = &cobra.Command{
 	Use:   "template",
 	Short: "Create a gomtp yaml template file.",
+	Long:  templateUsageMessage,
 	RunE:  templateCmdFunction,
 }
 

@@ -31,15 +31,15 @@ type EmailConfig struct {
 	Body              string `yaml:"body"`
 }
 
-const usageMessage = `
-gomtp # Read the gomtp.yaml file and send a test email.
-gomtp -f custom.yaml # Read the custom.yaml file and send a test email.`
+const usageMessage = `Example Commands: 
+  gomtp # Read the gomtp.yaml file and send a test email.
+  gomtp -f custom.yaml # Read the custom.yaml file and send a test email.`
 
 // RootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:     usageMessage,
-	Short:   "Test SMTP Settings",
-	Long:    `Gomtp is a CLI tool for go that tests SMTP settings easily.`,
+	Use:     "gomtp",
+	Short:   "Gomtp is a CLI tool for go that tests SMTP settings easily.",
+	Long:    usageMessage,
 	Version: version + " " + commitId,
 	RunE:    rootRun,
 }
