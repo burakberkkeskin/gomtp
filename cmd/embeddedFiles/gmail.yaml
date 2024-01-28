@@ -7,6 +7,7 @@ port: 587
 ssl: false
 tls: true
 auth: 'LOGIN'
+verifyCertificate: true
 subject: 'Testing Email'
 body: |
   this is line 1
