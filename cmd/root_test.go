@@ -69,7 +69,7 @@ func TestInvalidCredentialsBrevo(t *testing.T) {
 	command.SetOut(b)
 	command.SetErr(b)
 	command.Execute()
-	var expected string = "Invalid user"
+	var expected string = "Authentication failed"
 	assert.Contains(t, b.String(), expected, "Invalid credentials error expected.")
 
 }
