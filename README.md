@@ -71,6 +71,30 @@ docker compose up -d
 gomtp
 ```
 
+## Configure Once, Use For Anything
+
+If you want to use `gomtp` to send emails, you can configure a yaml and use it as base. For example, follow the use-case below: 
+
+- Create the template file for `gomtp.yaml` on your home directory.
+- Configure the `gomtp.yaml` for your Gmail account in `~/gomtp.yaml` path.
+```bash
+vim ~/gomtp.yaml
+```
+- Configure the `username`, `password`, `from`. Optionally delete the `to`, `subject` and `body` fields.
+- Now use `gomtp` use send email to any email address.
+- With `--body` flag:
+```bash
+gomtp -f ~/gomtp.yaml --to yourTargetEmailAddress@gmail.com --subject "Test Email From gomtp" --body "test from atlantic server"
+```
+- With `--body-file` flag:
+```bash
+gomtp -f ~/gomtp.yaml --to yourTargetEmailAddress@gmail.com --subject "Test Email From gomtp" --body-file "~/email-body.log"
+```
+- With piping a command output:
+```bash
+echo "This is an example command or bash script output" | gomtp -f ~/gomtp.yaml --to yourTargetEmailAddress@gmail.com --subject "Test Email From gomtp"
+```
+
 ## Release a version
 
 - Define a version.
