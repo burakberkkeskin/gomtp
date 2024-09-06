@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -154,8 +155,8 @@ func TestEmptySubjectYaml(t *testing.T) {
 	var expected string = "Email sent successfully!"
 	assert.Equal(t, expected, b.String(), "actual is not expected")
 
-	// // Wait a moment for MailHog to process the email
-	// time.Sleep(1 * time.Second)
+	// Wait a moment for MailHog to process the email
+	time.Sleep(1 * time.Second)
 
 	// Check MailHog for the sent email
 	resp, err := http.Get("http://localhost:8025/api/v2/messages")
@@ -193,7 +194,8 @@ func TestEmptyToYaml(t *testing.T) {
 
 	assert.Equal(t, "Email sent successfully!", b.String(), "unexpected command output")
 
-	// time.Sleep(1 * time.Second)
+	// Wait a moment for MailHog to process the email
+	time.Sleep(1 * time.Second)
 
 	resp, err := http.Get("http://localhost:8025/api/v2/messages")
 	assert.NoError(t, err, "failed to get messages from MailHog")
@@ -229,7 +231,8 @@ func TestEmptyBodyYaml(t *testing.T) {
 
 	assert.Equal(t, "Email sent successfully!", b.String(), "unexpected command output")
 
-	// time.Sleep(1 * time.Second)
+	// Wait a moment for MailHog to process the email
+	time.Sleep(1 * time.Second)
 
 	resp, err := http.Get("http://localhost:8025/api/v2/messages")
 	assert.NoError(t, err, "failed to get messages from MailHog")
@@ -266,16 +269,12 @@ func TestToFlag(t *testing.T) {
 
 	assert.Equal(t, "Email sent successfully!", b.String(), "unexpected command output")
 
+	// Wait a moment for MailHog to process the email
+	time.Sleep(1 * time.Second)
+
 	resp, err := http.Get("http://localhost:8025/api/v2/messages")
 	assert.NoError(t, err, "failed to get messages from MailHog")
 	defer resp.Body.Close()
-
-	// // Read and print the response body
-	// body, err := io.ReadAll(resp.Body)
-	// if err != nil {
-	// 	t.Fatalf("Failed to read response body: %v", err)
-	// }
-	// fmt.Printf("Response to test body: %s\n", string(body))
 
 	var mailhogResp MailhogResponse
 	err = json.NewDecoder(resp.Body).Decode(&mailhogResp)
@@ -309,16 +308,12 @@ func TestSubjectToFlag(t *testing.T) {
 
 	assert.Equal(t, "Email sent successfully!", b.String(), "unexpected command output")
 
+	// Wait a moment for MailHog to process the email
+	time.Sleep(1 * time.Second)
+
 	resp, err := http.Get("http://localhost:8025/api/v2/messages")
 	assert.NoError(t, err, "failed to get messages from MailHog")
 	defer resp.Body.Close()
-
-	// // Read and print the response body
-	// body, err := io.ReadAll(resp.Body)
-	// if err != nil {
-	// 	t.Fatalf("Failed to read response body: %v", err)
-	// }
-	// fmt.Printf("Response subject test body: %s\n", string(body))
 
 	var mailhogResp MailhogResponse
 	err = json.NewDecoder(resp.Body).Decode(&mailhogResp)
@@ -402,7 +397,9 @@ func TestSubjectToBodyFlag(t *testing.T) {
 
 	// Verify the output
 	assert.Equal(t, "Email sent successfully!", b.String(), "unexpected command output")
-	// time.Sleep(1 * time.Second)
+
+	// Wait a moment for MailHog to process the email
+	time.Sleep(1 * time.Second)
 
 	latestMessage := getLatestMessageForRecipient(t, "subjecttobodyflag@example.net")
 	assert.Equal(t, "Subject To Body Flag Test Subject", latestMessage.Content.Headers["Subject"][0], "unexpected email subject")
@@ -463,8 +460,8 @@ func TestStdinInput(t *testing.T) {
 	// Check the output
 	assert.Contains(t, outputBuffer.String(), "Email sent successfully!", "unexpected command output")
 
-	// // Sleep to ensure MailHog has processed the email
-	// time.Sleep(1 * time.Second)
+	// Wait a moment for MailHog to process the email
+	time.Sleep(1 * time.Second)
 
 	// Verify the email content
 	latestMessage := getLatestMessageForRecipient(t, "stdin@example.io")
