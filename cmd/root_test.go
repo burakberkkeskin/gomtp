@@ -368,8 +368,20 @@ func TestSubjectToFlag(t *testing.T) {
 // }
 
 func TestSubjectToBodyFlag(t *testing.T) {
-	//clearMailHog(t)
+	// Save the original stdin
+	oldStdin := os.Stdin
+	defer func() {
+		// Restore the original stdin after the test
+		os.Stdin = oldStdin
+	}()
 
+	// Optional: reset stdin if it was modified by other tests
+	if os.Stdin != oldStdin {
+		t.Log("stdin was modified, resetting")
+		os.Stdin = oldStdin
+	}
+
+	// Setup the command with arguments
 	command := rootCmd
 	command.SetArgs([]string{
 		"--file", "./tests/gomtpYamls/successConfigurationWithoutSubjectBody.yaml",
@@ -377,14 +389,18 @@ func TestSubjectToBodyFlag(t *testing.T) {
 		"--subject", "Subject To Body Flag Test Subject",
 		"--body", "Subject To Body Flag Test Body",
 	})
+
+	// Capture the output
 	b := bytes.NewBufferString("")
 	command.SetOut(b)
 	command.SetErr(b)
+
+	// Execute the command
 	err := command.Execute()
 	assert.NoError(t, err, "command execution failed")
 
+	// Verify the output
 	assert.Equal(t, "Email sent successfully!", b.String(), "unexpected command output")
-
 	// time.Sleep(1 * time.Second)
 
 	// latestMessage := getLatestMessageForRecipient(t, "subjecttobodyflag@example.net")
@@ -426,14 +442,6 @@ func TestStdinInput(t *testing.T) {
 
 	// Setup the command with arguments
 	command := rootCmd
-	command.SetArgs([]string{
-		"--file", "",
-		"--subject", "",
-		"--body", "",
-		"--body-file", "",
-		"--to", "",
-	})
-
 	command.SetArgs([]string{
 		"--file", "./tests/gomtpYamls/successConfigurationWithNoBody.yaml",
 		"--subject", "Body From STDIN Test Subject",
