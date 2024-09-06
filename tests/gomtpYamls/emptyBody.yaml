@@ -1,10 +1,10 @@
 username: ''
 password: ''
-from: 'from@example.com'
+from: 'emptyBodyFrom@example.com'
 host: '127.0.0.1'
 port: 1025
 ssl: false
 tls: false
 auth: 'NO'
-to: 'to@example.com'
+to: 'emptyBodyTo@example.com'
 subject: 'Testing Email For Empty Body'

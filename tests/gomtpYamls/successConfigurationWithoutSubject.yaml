@@ -1,10 +1,10 @@
 username: ''
 password: ''
-from: 'from@example.com'
+from: 'successConfigurationWithoutSubjectFrom@example.com'
 host: '127.0.0.1'
 port: 1025
 ssl: false
 tls: false
 auth: 'NO'
-to: 'to@example.com'
+to: 'successConfigurationWithoutSubjectTo@example.com'
 body: Subject To Flag Test Body
