@@ -139,7 +139,7 @@ type MailhogAddress struct {
 }
 
 func TestEmptySubjectYaml(t *testing.T) {
-	clearMailHog(t)
+	//clearMailHog(t)
 
 	command := rootCmd
 	command.SetArgs([]string{
@@ -179,7 +179,7 @@ func TestEmptySubjectYaml(t *testing.T) {
 }
 
 func TestEmptyToYaml(t *testing.T) {
-	clearMailHog(t)
+	//clearMailHog(t)
 
 	command := rootCmd
 	command.SetArgs([]string{
@@ -215,7 +215,7 @@ func TestEmptyToYaml(t *testing.T) {
 }
 
 func TestEmptyBodyYaml(t *testing.T) {
-	clearMailHog(t)
+	//clearMailHog(t)
 
 	command := rootCmd
 	command.SetArgs([]string{
@@ -251,7 +251,7 @@ func TestEmptyBodyYaml(t *testing.T) {
 }
 
 func TestToFlag(t *testing.T) {
-	clearMailHog(t)
+	//clearMailHog(t)
 
 	command := rootCmd
 	command.SetArgs([]string{
@@ -293,7 +293,7 @@ func TestToFlag(t *testing.T) {
 }
 
 func TestSubjectToFlag(t *testing.T) {
-	clearMailHog(t)
+	//clearMailHog(t)
 
 	command := rootCmd
 	command.SetArgs([]string{
@@ -370,7 +370,7 @@ func getLatestMessageForRecipient(t *testing.T, recipient string) MailhogMessage
 }
 
 func TestSubjectToBodyFlag(t *testing.T) {
-	clearMailHog(t)
+	//clearMailHog(t)
 
 	command := rootCmd
 	command.SetArgs([]string{
@@ -400,7 +400,7 @@ func TestSubjectToBodyFlag(t *testing.T) {
 
 // func TestStdinInput(t *testing.T) {
 // 	// Clear MailHog state
-// 	clearMailHog(t)
+// 	//clearMailHog(t)
 
 // 	// Save the original stdin
 // 	oldStdin := os.Stdin
