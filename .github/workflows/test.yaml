@@ -22,7 +22,10 @@ jobs:
         run: go test -coverprofile=coverage.out -c -o gomtp.test ./cmd/
 
       - name: Test the Application
-        run: ./gomtp.test -test.coverprofile ./c.out | tee testCoverage.out
+        run: | 
+          set -e
+          ./gomtp.test -test.coverprofile ./c.out | tee testCoverage.out
+          exit ${PIPESTATUS[0]}
 
       - name: Check Coverage If Higher Than 85
         run: |

@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"bytes"
+	"encoding/json"
+	"net/http"
 	"os"
 	"testing"
 
@@ -155,25 +157,25 @@ func TestEmptySubjectYaml(t *testing.T) {
 	// // Wait a moment for MailHog to process the email
 	// time.Sleep(1 * time.Second)
 
-	// // Check MailHog for the sent email
-	// resp, err := http.Get("http://localhost:8025/api/v2/messages")
-	// assert.NoError(t, err, "failed to get messages from MailHog")
-	// defer resp.Body.Close()
+	// Check MailHog for the sent email
+	resp, err := http.Get("http://localhost:8025/api/v2/messages")
+	assert.NoError(t, err, "failed to get messages from MailHog")
+	defer resp.Body.Close()
 
-	// var mailhogResp MailhogResponse
-	// err = json.NewDecoder(resp.Body).Decode(&mailhogResp)
-	// assert.NoError(t, err, "failed to decode MailHog response")
+	var mailhogResp MailhogResponse
+	err = json.NewDecoder(resp.Body).Decode(&mailhogResp)
+	assert.NoError(t, err, "failed to decode MailHog response")
 
-	// assert.NotEmpty(t, mailhogResp.Items, "no messages found in MailHog")
+	assert.NotEmpty(t, mailhogResp.Items, "no messages found in MailHog")
 
-	// // Check the latest message (first in the list)
-	// latestMessage := mailhogResp.Items[0]
-	// assert.Equal(t, "GOMTP Test Subject", latestMessage.Content.Headers["Subject"][0], "unexpected email subject")
-	// assert.Equal(t, "from", latestMessage.From.Mailbox, "unexpected sender mailbox")
-	// assert.Equal(t, "example.com", latestMessage.From.Domain, "unexpected sender domain")
-	// assert.Equal(t, "to", latestMessage.To[0].Mailbox, "unexpected recipient mailbox")
-	// assert.Equal(t, "example.com", latestMessage.To[0].Domain, "unexpected recipient domain")
-	// assert.Equal(t, "this is line 1\r\nThis is line 2", latestMessage.Content.Body, "unexpected email body")
+	// Check the latest message (first in the list)
+	latestMessage := mailhogResp.Items[0]
+	assert.Equal(t, "GOMTP Test Subject", latestMessage.Content.Headers["Subject"][0], "unexpected email subject")
+	assert.Equal(t, "from", latestMessage.From.Mailbox, "unexpected sender mailbox")
+	assert.Equal(t, "example.com", latestMessage.From.Domain, "unexpected sender domain")
+	assert.Equal(t, "to", latestMessage.To[0].Mailbox, "unexpected recipient mailbox")
+	assert.Equal(t, "example.com", latestMessage.To[0].Domain, "unexpected recipient domain")
+	assert.Equal(t, "this is line 1\r\nThis is line 2", latestMessage.Content.Body, "unexpected email body")
 }
 
 func TestEmptyToYaml(t *testing.T) {
@@ -193,23 +195,23 @@ func TestEmptyToYaml(t *testing.T) {
 
 	// time.Sleep(1 * time.Second)
 
-	// resp, err := http.Get("http://localhost:8025/api/v2/messages")
-	// assert.NoError(t, err, "failed to get messages from MailHog")
-	// defer resp.Body.Close()
+	resp, err := http.Get("http://localhost:8025/api/v2/messages")
+	assert.NoError(t, err, "failed to get messages from MailHog")
+	defer resp.Body.Close()
 
-	// var mailhogResp MailhogResponse
-	// err = json.NewDecoder(resp.Body).Decode(&mailhogResp)
-	// assert.NoError(t, err, "failed to decode MailHog response")
+	var mailhogResp MailhogResponse
+	err = json.NewDecoder(resp.Body).Decode(&mailhogResp)
+	assert.NoError(t, err, "failed to decode MailHog response")
 
-	// assert.NotEmpty(t, mailhogResp.Items, "no messages found in MailHog")
+	assert.NotEmpty(t, mailhogResp.Items, "no messages found in MailHog")
 
-	// latestMessage := mailhogResp.Items[0]
-	// assert.Equal(t, "Testing Email", latestMessage.Content.Headers["Subject"][0], "unexpected email subject")
-	// assert.Equal(t, "from", latestMessage.From.Mailbox, "unexpected sender mailbox")
-	// assert.Equal(t, "example.com", latestMessage.From.Domain, "unexpected sender domain")
-	// assert.Equal(t, "to", latestMessage.To[0].Mailbox, "unexpected recipient mailbox")
-	// assert.Equal(t, "example.com", latestMessage.To[0].Domain, "unexpected recipient domain")
-	// assert.Equal(t, "Empty To Test Body", latestMessage.Content.Body, "unexpected email body")
+	latestMessage := mailhogResp.Items[0]
+	assert.Equal(t, "Testing Email", latestMessage.Content.Headers["Subject"][0], "unexpected email subject")
+	assert.Equal(t, "from", latestMessage.From.Mailbox, "unexpected sender mailbox")
+	assert.Equal(t, "example.com", latestMessage.From.Domain, "unexpected sender domain")
+	assert.Equal(t, "to", latestMessage.To[0].Mailbox, "unexpected recipient mailbox")
+	assert.Equal(t, "example.com", latestMessage.To[0].Domain, "unexpected recipient domain")
+	assert.Equal(t, "Empty To Test Body", latestMessage.Content.Body, "unexpected email body")
 }
 
 func TestEmptyBodyYaml(t *testing.T) {
@@ -229,23 +231,23 @@ func TestEmptyBodyYaml(t *testing.T) {
 
 	// time.Sleep(1 * time.Second)
 
-	// resp, err := http.Get("http://localhost:8025/api/v2/messages")
-	// assert.NoError(t, err, "failed to get messages from MailHog")
-	// defer resp.Body.Close()
+	resp, err := http.Get("http://localhost:8025/api/v2/messages")
+	assert.NoError(t, err, "failed to get messages from MailHog")
+	defer resp.Body.Close()
 
-	// var mailhogResp MailhogResponse
-	// err = json.NewDecoder(resp.Body).Decode(&mailhogResp)
-	// assert.NoError(t, err, "failed to decode MailHog response")
+	var mailhogResp MailhogResponse
+	err = json.NewDecoder(resp.Body).Decode(&mailhogResp)
+	assert.NoError(t, err, "failed to decode MailHog response")
 
-	// assert.NotEmpty(t, mailhogResp.Items, "no messages found in MailHog")
+	assert.NotEmpty(t, mailhogResp.Items, "no messages found in MailHog")
 
-	// latestMessage := mailhogResp.Items[0]
-	// assert.Equal(t, "Testing Email For Empty Body", latestMessage.Content.Headers["Subject"][0], "unexpected email subject")
-	// assert.Equal(t, "from", latestMessage.From.Mailbox, "unexpected sender mailbox")
-	// assert.Equal(t, "example.com", latestMessage.From.Domain, "unexpected sender domain")
-	// assert.Equal(t, "to", latestMessage.To[0].Mailbox, "unexpected recipient mailbox")
-	// assert.Equal(t, "example.com", latestMessage.To[0].Domain, "unexpected recipient domain")
-	// assert.Equal(t, "This is the test email sent by gomtp.", latestMessage.Content.Body, "unexpected email body")
+	latestMessage := mailhogResp.Items[0]
+	assert.Equal(t, "Testing Email For Empty Body", latestMessage.Content.Headers["Subject"][0], "unexpected email subject")
+	assert.Equal(t, "from", latestMessage.From.Mailbox, "unexpected sender mailbox")
+	assert.Equal(t, "example.com", latestMessage.From.Domain, "unexpected sender domain")
+	assert.Equal(t, "to", latestMessage.To[0].Mailbox, "unexpected recipient mailbox")
+	assert.Equal(t, "example.com", latestMessage.To[0].Domain, "unexpected recipient domain")
+	assert.Equal(t, "This is the test email sent by gomtp.", latestMessage.Content.Body, "unexpected email body")
 }
 
 func TestToFlag(t *testing.T) {
@@ -264,30 +266,30 @@ func TestToFlag(t *testing.T) {
 
 	assert.Equal(t, "Email sent successfully!", b.String(), "unexpected command output")
 
-	// resp, err := http.Get("http://localhost:8025/api/v2/messages")
-	// assert.NoError(t, err, "failed to get messages from MailHog")
-	// defer resp.Body.Close()
+	resp, err := http.Get("http://localhost:8025/api/v2/messages")
+	assert.NoError(t, err, "failed to get messages from MailHog")
+	defer resp.Body.Close()
 
-	// // // Read and print the response body
-	// // body, err := io.ReadAll(resp.Body)
-	// // if err != nil {
-	// // 	t.Fatalf("Failed to read response body: %v", err)
-	// // }
-	// // fmt.Printf("Response to test body: %s\n", string(body))
+	// // Read and print the response body
+	// body, err := io.ReadAll(resp.Body)
+	// if err != nil {
+	// 	t.Fatalf("Failed to read response body: %v", err)
+	// }
+	// fmt.Printf("Response to test body: %s\n", string(body))
 
-	// var mailhogResp MailhogResponse
-	// err = json.NewDecoder(resp.Body).Decode(&mailhogResp)
-	// assert.NoError(t, err, "failed to decode MailHog response")
+	var mailhogResp MailhogResponse
+	err = json.NewDecoder(resp.Body).Decode(&mailhogResp)
+	assert.NoError(t, err, "failed to decode MailHog response")
 
-	// assert.NotEmpty(t, mailhogResp.Items, "no messages found in MailHog")
+	assert.NotEmpty(t, mailhogResp.Items, "no messages found in MailHog")
 
-	// latestMessage := mailhogResp.Items[0]
-	// assert.Equal(t, "To Flag Test Subject", latestMessage.Content.Headers["Subject"][0], "unexpected email subject")
-	// assert.Equal(t, "from", latestMessage.From.Mailbox, "unexpected sender mailbox")
-	// assert.Equal(t, "example.com", latestMessage.From.Domain, "unexpected sender domain")
-	// assert.Equal(t, "to-flag-test", latestMessage.To[0].Mailbox, "unexpected recipient mailbox")
-	// assert.Equal(t, "example.com", latestMessage.To[0].Domain, "unexpected recipient domain")
-	// assert.Equal(t, "To Flag Test Body", latestMessage.Content.Body, "unexpected email body")
+	latestMessage := mailhogResp.Items[0]
+	assert.Equal(t, "To Flag Test Subject", latestMessage.Content.Headers["Subject"][0], "unexpected email subject")
+	assert.Equal(t, "from", latestMessage.From.Mailbox, "unexpected sender mailbox")
+	assert.Equal(t, "example.com", latestMessage.From.Domain, "unexpected sender domain")
+	assert.Equal(t, "to-flag-test", latestMessage.To[0].Mailbox, "unexpected recipient mailbox")
+	assert.Equal(t, "example.com", latestMessage.To[0].Domain, "unexpected recipient domain")
+	assert.Equal(t, "To Flag Test Body", latestMessage.Content.Body, "unexpected email body")
 }
 
 func TestSubjectToFlag(t *testing.T) {
@@ -307,9 +309,9 @@ func TestSubjectToFlag(t *testing.T) {
 
 	assert.Equal(t, "Email sent successfully!", b.String(), "unexpected command output")
 
-	// resp, err := http.Get("http://localhost:8025/api/v2/messages")
-	// assert.NoError(t, err, "failed to get messages from MailHog")
-	// defer resp.Body.Close()
+	resp, err := http.Get("http://localhost:8025/api/v2/messages")
+	assert.NoError(t, err, "failed to get messages from MailHog")
+	defer resp.Body.Close()
 
 	// // Read and print the response body
 	// body, err := io.ReadAll(resp.Body)
@@ -318,54 +320,53 @@ func TestSubjectToFlag(t *testing.T) {
 	// }
 	// fmt.Printf("Response subject test body: %s\n", string(body))
 
-	// var mailhogResp MailhogResponse
-	// err = json.NewDecoder(resp.Body).Decode(&mailhogResp)
-	// assert.NoError(t, err, "failed to decode MailHog response")
+	var mailhogResp MailhogResponse
+	err = json.NewDecoder(resp.Body).Decode(&mailhogResp)
+	assert.NoError(t, err, "failed to decode MailHog response")
 
-	// assert.NotEmpty(t, mailhogResp.Items, "no messages found in MailHog")
+	assert.NotEmpty(t, mailhogResp.Items, "no messages found in MailHog")
 
-	// latestMessage := mailhogResp.Items[0]
-	// assert.Equal(t, "Subject To Flag Test Subject", latestMessage.Content.Headers["Subject"][0], "unexpected email subject")
-	// assert.Equal(t, "from", latestMessage.From.Mailbox, "unexpected sender mailbox")
-	// assert.Equal(t, "example.com", latestMessage.From.Domain, "unexpected sender domain")
-	// assert.Equal(t, "to2", latestMessage.To[0].Mailbox, "unexpected recipient mailbox")
-	// assert.Equal(t, "example.org", latestMessage.To[0].Domain, "unexpected recipient domain")
-	// assert.Equal(t, "Subject To Flag Test Body", latestMessage.Content.Body, "unexpected email body")
-
+	latestMessage := mailhogResp.Items[0]
+	assert.Equal(t, "Subject To Flag Test Subject", latestMessage.Content.Headers["Subject"][0], "unexpected email subject")
+	assert.Equal(t, "from", latestMessage.From.Mailbox, "unexpected sender mailbox")
+	assert.Equal(t, "example.com", latestMessage.From.Domain, "unexpected sender domain")
+	assert.Equal(t, "to2", latestMessage.To[0].Mailbox, "unexpected recipient mailbox")
+	assert.Equal(t, "example.org", latestMessage.To[0].Domain, "unexpected recipient domain")
+	assert.Equal(t, "Subject To Flag Test Body", latestMessage.Content.Body, "unexpected email body")
 }
 
-// func clearMailHog(t *testing.T) {
-// 	req, err := http.NewRequest("DELETE", "http://localhost:8025/api/v1/messages", nil)
-// 	assert.NoError(t, err, "failed to create DELETE request")
+func clearMailHog(t *testing.T) {
+	req, err := http.NewRequest("DELETE", "http://localhost:8025/api/v1/messages", nil)
+	assert.NoError(t, err, "failed to create DELETE request")
 
-// 	client := &http.Client{}
-// 	resp, err := client.Do(req)
-// 	assert.NoError(t, err, "failed to send DELETE request to MailHog")
-// 	defer resp.Body.Close()
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	assert.NoError(t, err, "failed to send DELETE request to MailHog")
+	defer resp.Body.Close()
 
-// 	assert.Equal(t, http.StatusOK, resp.StatusCode, "unexpected status code when clearing MailHog")
-// }
+	assert.Equal(t, http.StatusOK, resp.StatusCode, "unexpected status code when clearing MailHog")
+}
 
-// func getLatestMessageForRecipient(t *testing.T, recipient string) MailhogMessage {
-// 	resp, err := http.Get("http://localhost:8025/api/v2/messages")
-// 	assert.NoError(t, err, "failed to get messages from MailHog")
-// 	defer resp.Body.Close()
+func getLatestMessageForRecipient(t *testing.T, recipient string) MailhogMessage {
+	resp, err := http.Get("http://localhost:8025/api/v2/messages")
+	assert.NoError(t, err, "failed to get messages from MailHog")
+	defer resp.Body.Close()
 
-// 	var mailhogResp MailhogResponse
-// 	err = json.NewDecoder(resp.Body).Decode(&mailhogResp)
-// 	assert.NoError(t, err, "failed to decode MailHog response")
+	var mailhogResp MailhogResponse
+	err = json.NewDecoder(resp.Body).Decode(&mailhogResp)
+	assert.NoError(t, err, "failed to decode MailHog response")
 
-// 	assert.NotEmpty(t, mailhogResp.Items, "no messages found in MailHog")
+	assert.NotEmpty(t, mailhogResp.Items, "no messages found in MailHog")
 
-// 	for _, msg := range mailhogResp.Items {
-// 		if msg.To[0].Mailbox+"@"+msg.To[0].Domain == recipient {
-// 			return msg
-// 		}
-// 	}
+	for _, msg := range mailhogResp.Items {
+		if msg.To[0].Mailbox+"@"+msg.To[0].Domain == recipient {
+			return msg
+		}
+	}
 
-// 	t.Fatalf("No message found for recipient: %s", recipient)
-// 	return MailhogMessage{}
-// }
+	t.Fatalf("No message found for recipient: %s", recipient)
+	return MailhogMessage{}
+}
 
 func TestSubjectToBodyFlag(t *testing.T) {
 	// Save the original stdin
@@ -403,13 +404,13 @@ func TestSubjectToBodyFlag(t *testing.T) {
 	assert.Equal(t, "Email sent successfully!", b.String(), "unexpected command output")
 	// time.Sleep(1 * time.Second)
 
-	// latestMessage := getLatestMessageForRecipient(t, "subjecttobodyflag@example.net")
-	// assert.Equal(t, "Subject To Body Flag Test Subject", latestMessage.Content.Headers["Subject"][0], "unexpected email subject")
-	// assert.Equal(t, "from", latestMessage.From.Mailbox, "unexpected sender mailbox")
-	// assert.Equal(t, "example.com", latestMessage.From.Domain, "unexpected sender domain")
-	// assert.Equal(t, "subjecttobodyflag", latestMessage.To[0].Mailbox, "unexpected recipient mailbox")
-	// assert.Equal(t, "example.net", latestMessage.To[0].Domain, "unexpected recipient domain")
-	// assert.Equal(t, "Subject To Body Flag Test Body", latestMessage.Content.Body, "unexpected email body")
+	latestMessage := getLatestMessageForRecipient(t, "subjecttobodyflag@example.net")
+	assert.Equal(t, "Subject To Body Flag Test Subject", latestMessage.Content.Headers["Subject"][0], "unexpected email subject")
+	assert.Equal(t, "from", latestMessage.From.Mailbox, "unexpected sender mailbox")
+	assert.Equal(t, "example.com", latestMessage.From.Domain, "unexpected sender domain")
+	assert.Equal(t, "subjecttobodyflag", latestMessage.To[0].Mailbox, "unexpected recipient mailbox")
+	assert.Equal(t, "example.net", latestMessage.To[0].Domain, "unexpected recipient domain")
+	assert.Equal(t, "Subject To Body Flag Test Body", latestMessage.Content.Body, "unexpected email body")
 }
 
 func TestStdinInput(t *testing.T) {
@@ -465,12 +466,12 @@ func TestStdinInput(t *testing.T) {
 	// // Sleep to ensure MailHog has processed the email
 	// time.Sleep(1 * time.Second)
 
-	// // Verify the email content
-	// latestMessage := getLatestMessageForRecipient(t, "stdin@example.io")
-	// assert.Equal(t, "Body From STDIN Test Subject", latestMessage.Content.Headers["Subject"][0], "unexpected email subject")
-	// assert.Equal(t, "from", latestMessage.From.Mailbox, "unexpected sender mailbox")
-	// assert.Equal(t, "example.com", latestMessage.From.Domain, "unexpected sender domain")
-	// assert.Equal(t, "stdin", latestMessage.To[0].Mailbox, "unexpected recipient mailbox")
-	// assert.Equal(t, "example.io", latestMessage.To[0].Domain, "unexpected recipient domain")
-	// assert.Equal(t, "Body from stdin", latestMessage.Content.Body, "unexpected email body")
+	// Verify the email content
+	latestMessage := getLatestMessageForRecipient(t, "stdin@example.io")
+	assert.Equal(t, "Body From STDIN Test Subject", latestMessage.Content.Headers["Subject"][0], "unexpected email subject")
+	assert.Equal(t, "from", latestMessage.From.Mailbox, "unexpected sender mailbox")
+	assert.Equal(t, "example.com", latestMessage.From.Domain, "unexpected sender domain")
+	assert.Equal(t, "stdin", latestMessage.To[0].Mailbox, "unexpected recipient mailbox")
+	assert.Equal(t, "example.io", latestMessage.To[0].Domain, "unexpected recipient domain")
+	assert.Equal(t, "Body from stdin", latestMessage.Content.Body, "unexpected email body")
 }
