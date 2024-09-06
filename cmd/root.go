@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"crypto/tls"
+	"io"
 	"net/smtp"
 	"os"
 
@@ -68,6 +69,18 @@ func rootRun(cmd *cobra.Command, args []string) error {
 	if emailConfig.To == "" {
 		emailConfig.To = "to@example.com"
 	}
+
+	// Read the email body from stdin if provided.
+	stdinInfo, _ := os.Stdin.Stat()
+	if (stdinInfo.Mode() & os.ModeCharDevice) == 0 {
+		body, err := io.ReadAll(os.Stdin)
+		if err != nil {
+			return err
+		}
+		emailConfig.Body = string(body)
+	}
+
+	// set values from flags
 	if emailTo != "" {
 		emailConfig.To = emailTo
 	}
