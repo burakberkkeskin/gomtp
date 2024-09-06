@@ -426,7 +426,14 @@ func TestStdinInput(t *testing.T) {
 
 	// Setup the command with arguments
 	command := rootCmd
-	command.SetArgs([]string{})
+	command.SetArgs([]string{
+		"--file", "",
+		"--subject", "",
+		"--body", "",
+		"--body-file", "",
+		"--to", "",
+	})
+
 	command.SetArgs([]string{
 		"--file", "./tests/gomtpYamls/successConfigurationWithNoBody.yaml",
 		"--subject", "Body From STDIN Test Subject",
