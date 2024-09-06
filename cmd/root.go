@@ -12,6 +12,9 @@ import (
 
 // CLI flags
 var gomtpYamlPath string
+var emailTo string
+var emailSubject string
+var emailBody string
 
 var version string
 var commitId string
@@ -59,9 +62,20 @@ func rootRun(cmd *cobra.Command, args []string) error {
 	if emailConfig.Subject == "" {
 		emailConfig.Subject = "GOMTP Test Subject"
 	}
-
 	if emailConfig.Body == "" {
 		emailConfig.Body = "This is the test email sent by gomtp."
+	}
+	if emailConfig.To == "" {
+		emailConfig.To = "to@example.com"
+	}
+	if emailTo != "" {
+		emailConfig.To = emailTo
+	}
+	if emailSubject != "" {
+		emailConfig.Subject = emailSubject
+	}
+	if emailBody != "" {
+		emailConfig.Body = emailBody
 	}
 
 	// Create the email message
@@ -109,4 +123,7 @@ func Execute() {
 func init() {
 	rootCmd.Flags().BoolP("help", "h", false, "Help menu.")
 	rootCmd.Flags().StringVarP(&gomtpYamlPath, "file", "f", "gomtp.yaml", "Configuration file path.")
+	rootCmd.Flags().StringVar(&emailTo, "to", "", "Target email address.")
+	rootCmd.Flags().StringVarP(&emailSubject, "subject", "s", "", "Subject of the email.")
+	rootCmd.Flags().StringVarP(&emailBody, "body", "b", "", "Body of the email.")
 }
