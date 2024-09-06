@@ -87,15 +87,12 @@ func rootRun(cmd *cobra.Command, args []string) error {
 	// Validate body input
 	bodySourceCount := 0
 	if stdIOBody {
-		fmt.Println("stdIO supplied")
 		bodySourceCount++
 	}
 	if emailBody != "" {
-		fmt.Println("email body supplied")
 		bodySourceCount++
 	}
 	if emailBodyFile != "" {
-		fmt.Println("email body file supplied")
 		bodySourceCount++
 	}
 

@@ -396,15 +396,8 @@ func TestSubjectToBodyFlag(t *testing.T) {
 	// assert.Equal(t, "Subject To Body Flag Test Body", latestMessage.Content.Body, "unexpected email body")
 }
 
-func resetState() {
-	// Reset any global or shared states here
-	emailBody = ""
-	emailBodyFile = ""
-}
-
 func TestStdinInput(t *testing.T) {
 	// Reset the state before the test
-	resetState()
 
 	// Clear MailHog state if necessary
 	// clearMailHog(t)
@@ -433,9 +426,12 @@ func TestStdinInput(t *testing.T) {
 
 	// Setup the command with arguments
 	command := rootCmd
+	command.SetArgs([]string{})
 	command.SetArgs([]string{
 		"--file", "./tests/gomtpYamls/successConfigurationWithNoBody.yaml",
 		"--subject", "Body From STDIN Test Subject",
+		"--body", "",
+		"--body-file", "",
 		"--to", "stdin@example.io",
 	})
 
