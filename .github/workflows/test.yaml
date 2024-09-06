@@ -27,4 +27,4 @@ jobs:
       - name: Check Coverage If Higher Than 85
         run: |
           export coverage=$(grep -oP '(?<=coverage: )[0-9.]+' testCoverage.out)
-          expr $coverage '>' 85
+          echo "$coverage" | awk -v threshold=85 '{if ($1 > threshold) exit 0; else exit 1}'
