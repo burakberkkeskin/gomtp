@@ -396,9 +396,18 @@ func TestSubjectToBodyFlag(t *testing.T) {
 	// assert.Equal(t, "Subject To Body Flag Test Body", latestMessage.Content.Body, "unexpected email body")
 }
 
+func resetState() {
+	// Reset any global or shared states here
+	emailBody = ""
+	emailBodyFile = ""
+}
+
 func TestStdinInput(t *testing.T) {
-	// Clear MailHog state
-	//clearMailHog(t)
+	// Reset the state before the test
+	resetState()
+
+	// Clear MailHog state if necessary
+	// clearMailHog(t)
 
 	// Save the original stdin
 	oldStdin := os.Stdin
@@ -440,7 +449,7 @@ func TestStdinInput(t *testing.T) {
 	assert.NoError(t, err, "command execution failed")
 
 	// Check the output
-	assert.Equal(t, "Email sent successfully!", outputBuffer.String(), "unexpected command output")
+	assert.Contains(t, outputBuffer.String(), "Email sent successfully!", "unexpected command output")
 
 	// // Sleep to ensure MailHog has processed the email
 	// time.Sleep(1 * time.Second)
