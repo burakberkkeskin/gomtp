@@ -19,7 +19,7 @@ You can build the `gomtp` locally, on your own machine.
 
 ```bash
 version=$(git describe --tags --abbrev=0) && \
-commitId=$(git rev-parse --short $version) && \
+commitId=$(git --no-pager log -1 --oneline | awk '{print $1}') && \
 go build -ldflags "-X gomtp/cmd.version=$version -X gomtp/cmd.commitId=$commitId" -o gomtp -v .
 ```
 
