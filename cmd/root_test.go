@@ -155,6 +155,7 @@ func TestEmptySubjectYaml(t *testing.T) {
 
 	var expected string = "Email sent successfully!"
 	assert.Equal(t, expected, b.String(), "actual is not expected")
+	fmt.Printf("Command stdout: %s", b.String())
 
 	// Wait a moment for MailHog to process the email
 	time.Sleep(1 * time.Second)

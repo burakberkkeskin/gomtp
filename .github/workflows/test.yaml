@@ -18,9 +18,6 @@ jobs:
       - name: Run Dependencies
         run: docker compose up -d
 
-      - name: Wait 10 seconds before mailhog gets ready
-        run: sleep 10
-
       - name: Compile the Test
         run: go test -coverprofile=coverage.out -c -o gomtp.test ./cmd/
 
