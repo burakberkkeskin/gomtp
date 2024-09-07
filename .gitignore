@@ -16,6 +16,7 @@ build
 # Dependency directories (remove the comment below to include it)
 # vendor/
 
+mailpit-data
 # Go workspace file
 go.work
 
