@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"crypto/tls"
+	"fmt"
+	"io"
 	"net/smtp"
 	"os"
 
@@ -12,6 +14,10 @@ import (
 
 // CLI flags
 var gomtpYamlPath string
+var emailTo string
+var emailSubject string
+var emailBody string
+var emailBodyFile string
 
 var version string
 var commitId string
@@ -59,9 +65,58 @@ func rootRun(cmd *cobra.Command, args []string) error {
 	if emailConfig.Subject == "" {
 		emailConfig.Subject = "GOMTP Test Subject"
 	}
-
 	if emailConfig.Body == "" {
 		emailConfig.Body = "This is the test email sent by gomtp."
+	}
+	if emailConfig.To == "" {
+		emailConfig.To = "to@example.com"
+	}
+
+	// Read the email body from stdin if provided
+	stdIOBody := false
+	stdinInfo, _ := os.Stdin.Stat()
+	if (stdinInfo.Mode() & os.ModeCharDevice) == 0 {
+		body, err := io.ReadAll(os.Stdin)
+		if err != nil {
+			return err
+		}
+		emailConfig.Body = string(body)
+		stdIOBody = true
+	}
+
+	// Validate body input
+	bodySourceCount := 0
+	if stdIOBody {
+		bodySourceCount++
+	}
+	if emailBody != "" {
+		bodySourceCount++
+	}
+	if emailBodyFile != "" {
+		bodySourceCount++
+	}
+
+	if bodySourceCount > 1 {
+		return fmt.Errorf("cannot specify body via multiple sources simultaneously")
+	}
+
+	if emailBodyFile != "" {
+		// Read the email body from file if emailBodyFile is provided
+		body, err := os.ReadFile(emailBodyFile)
+		if err != nil {
+			return err
+		}
+		emailConfig.Body = string(body)
+	} else if emailBody != "" {
+		emailConfig.Body = emailBody
+	}
+
+	// Set values from flags
+	if emailTo != "" {
+		emailConfig.To = emailTo
+	}
+	if emailSubject != "" {
+		emailConfig.Subject = emailSubject
 	}
 
 	// Create the email message
@@ -70,6 +125,7 @@ func rootRun(cmd *cobra.Command, args []string) error {
 	m.SetHeader("To", emailConfig.To)
 	m.SetHeader("Subject", emailConfig.Subject)
 	m.SetBody("text/plain", emailConfig.Body)
+
 	// Dial to the SMTP server
 	d := gomail.NewDialer(emailConfig.Host, emailConfig.Port, emailConfig.Username, emailConfig.Password)
 
@@ -109,4 +165,8 @@ func Execute() {
 func init() {
 	rootCmd.Flags().BoolP("help", "h", false, "Help menu.")
 	rootCmd.Flags().StringVarP(&gomtpYamlPath, "file", "f", "gomtp.yaml", "Configuration file path.")
+	rootCmd.Flags().StringVar(&emailTo, "to", "", "Target email address.")
+	rootCmd.Flags().StringVarP(&emailSubject, "subject", "s", "", "Subject of the email.")
+	rootCmd.Flags().StringVarP(&emailBody, "body", "b", "", "Body of the email.")
+	rootCmd.Flags().StringVar(&emailBodyFile, "body-file", "", "File that contains body of the email.")
 }

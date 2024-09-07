@@ -1,0 +1,10 @@
+username: ''
+password: ''
+from: 'emptyBodyFrom@example.com'
+host: '127.0.0.1'
+port: 1025
+ssl: false
+tls: false
+auth: 'NO'
+to: 'emptyBodyTo@example.com'
+subject: 'Testing Email For Empty Subject'

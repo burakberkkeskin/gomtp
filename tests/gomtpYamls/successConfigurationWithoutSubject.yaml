@@ -1,0 +1,10 @@
+username: ''
+password: ''
+from: 'successConfigurationWithoutSubjectFrom@example.com'
+host: '127.0.0.1'
+port: 1025
+ssl: false
+tls: false
+auth: 'NO'
+to: 'successConfigurationWithoutSubjectTo@example.com'
+body: Subject To Flag Test Body
