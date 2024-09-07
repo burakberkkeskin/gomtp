@@ -3,6 +3,8 @@ package cmd
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"testing"
@@ -159,6 +161,7 @@ func TestEmptySubjectYaml(t *testing.T) {
 
 	// Check the latest message (first in the list)
 	latestMessage := getLatestMessageForRecipient(t, "emptySubject@example.com")
+
 	assert.Equal(t, "GOMTP Test Subject", latestMessage.Content.Headers["Subject"][0], "unexpected email subject")
 	assert.Equal(t, "from", latestMessage.From.Mailbox, "unexpected sender mailbox")
 	assert.Equal(t, "example.com", latestMessage.From.Domain, "unexpected sender domain")
@@ -294,7 +297,12 @@ func getLatestMessageForRecipient(t *testing.T, recipient string) MailhogMessage
 	resp, err := http.Get("http://localhost:8025/api/v2/messages")
 	assert.NoError(t, err, "failed to get messages from MailHog")
 	defer resp.Body.Close()
+	// Read the response body
+	body, err := io.ReadAll(resp.Body)
+	assert.NoError(t, err, "failed to read response body")
 
+	// Print the response body
+	fmt.Println("Response Body:", string(body))
 	var mailhogResp MailhogResponse
 	err = json.NewDecoder(resp.Body).Decode(&mailhogResp)
 	assert.NoError(t, err, "failed to decode MailHog response")
