@@ -133,21 +133,18 @@ docker compose up -d
 - You can run e2e tests to ensure application stability.
 
 ```bash
-go test -c -o gomtp.test ./cmd/ && \
-./gomtp.test
+go test -p 1 ./cmd/
 ```
 
 - Check the test coverage:
 
 ```bash
-go test -coverprofile=coverage.out -c -o gomtp.test ./cmd/ && \
-./gomtp.test -test.coverprofile ./c.out
+go test -p 1 ./cmd/ -coverprofile=coverage.out
 ```
 
 - You can see covered lines with html report:
 
 ```bash
-go test -coverprofile=coverage.out -c -o gomtp.test ./cmd/ && \
-./gomtp.test -test.coverprofile ./c.out && \
+go test -p 1 ./cmd/ -coverprofile=coverage.out  -test.coverprofile ./c.out && \
 go tool cover -html=c.out
 ```

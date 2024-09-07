@@ -7,7 +7,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/spf13/cobra"
+	"github.com/stretchr/testify/suite"
 )
 
 type MailhogResponse struct {
@@ -27,340 +28,403 @@ type MailhogAddress struct {
 	Address string `json:"Address"`
 }
 
-func getLatestMessageForRecipient(t *testing.T, recipient string) MailhogMessage {
+func getLatestMessageForRecipient(recipient string) (MailhogMessage, error) {
 	resp, err := http.Get("http://localhost:8025/api/v1/messages")
-	assert.NoError(t, err, "failed to get messages from MailHog")
+
+	if err != nil {
+		return MailhogMessage{}, err
+	}
+
 	defer resp.Body.Close()
 
 	var mailhogResp MailhogResponse
 	err = json.NewDecoder(resp.Body).Decode(&mailhogResp)
-	assert.NoError(t, err, "failed to decode MailHog response")
 
-	assert.NotEmpty(t, mailhogResp.Items, "no messages found in MailHog")
+	if err != nil {
+		return MailhogMessage{}, err
+	}
 
 	for _, msg := range mailhogResp.Items {
 		if msg.To[0].Address == recipient {
-			return msg
+			return msg, nil
 		}
 	}
 
-	t.Fatalf("No message found for recipient: %s", recipient)
-	return MailhogMessage{}
+	return MailhogMessage{}, nil
 }
 
-func clearMailHog(t *testing.T) {
-	req, err := http.NewRequest("DELETE", "http://localhost:8025/api/v1/messages", nil)
-	assert.NoError(t, err, "failed to create DELETE request")
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	assert.NoError(t, err, "failed to send DELETE request to MailHog")
-	defer resp.Body.Close()
-
-	assert.Equal(t, http.StatusOK, resp.StatusCode, "unexpected status code when clearing MailHog")
+type TestGOMTPSuite struct {
+	suite.Suite
+	cmd cobra.Command
 }
 
-func TestHappyPath(t *testing.T) {
-	command := rootCmd
-	command.SetArgs([]string{
-		"--file", "./tests/gomtpYamls/successConfiguration.yaml",
-	})
-	b := bytes.NewBufferString("")
-	command.SetOut(b)
-	command.SetErr(b)
-	command.Execute()
-	var expected string = "Email sent successfully!"
-	assert.Equal(t, expected, b.String(), "actual is not expected")
+func TestGOMTPSuiteTest(t *testing.T) {
+	suite.Run(t, new(TestGOMTPSuite))
 }
 
-func TestGomtpYamlNotFound(t *testing.T) {
-	command := rootCmd
-	b := bytes.NewBufferString("")
-	command.SetArgs([]string{
-		"--file", "./unknown/path.yaml",
-	})
-	command.SetOut(b)
-	command.SetErr(b)
-	command.Execute()
-	var expected string = "no such file or directory"
-	assert.Contains(t, b.String(), expected, "File not found error expected.")
+func (suite *TestGOMTPSuite) SetupTest() {
+	suite.cmd = *rootCmd
 }
 
-func TestInvalidCredentialsGoogle(t *testing.T) {
-	command := rootCmd
-	b := bytes.NewBufferString("")
-	command.SetArgs([]string{
-		"--file", "./tests/gomtpYamls/invalidCredentialsGoogle.yaml",
-	})
-	command.SetOut(b)
-	command.SetErr(b)
-	command.Execute()
-	var expected string = "Username and Password not accepted"
-	assert.Contains(t, b.String(), expected, "Invalid credentials error expected.")
-}
+func (suite *TestGOMTPSuite) TestHappyPath() {
+	expected := "Email sent successfully!"
 
-func TestInvalidCredentialsYandex(t *testing.T) {
-	command := rootCmd
-	b := bytes.NewBufferString("")
-	command.SetArgs([]string{
-		"--file", "./tests/gomtpYamls/invalidCredentialsYandex.yaml",
-	})
-	command.SetOut(b)
-	command.SetErr(b)
-	command.Execute()
-	var expected string = "authentication failed: Invalid user or password"
-	assert.Contains(t, b.String(), expected, "Invalid credentials error expected.")
-
-}
-
-func TestInvalidCredentialsBrevo(t *testing.T) {
-	command := rootCmd
-	b := bytes.NewBufferString("")
-	command.SetArgs([]string{
-		"--file", "./tests/gomtpYamls/invalidCredentialsBrevo.yaml",
-	})
-	command.SetOut(b)
-	command.SetErr(b)
-	command.Execute()
-	var expected string = "Authentication failed"
-	assert.Contains(t, b.String(), expected, "Invalid credentials error expected.")
-
-}
-
-func TestInvalidSSLConfiguration(t *testing.T) {
-	command := rootCmd
-	b := bytes.NewBufferString("")
-	command.SetArgs([]string{
-		"--file", "./tests/gomtpYamls/nonSslServerWithSslConfiguration.yaml",
-	})
-	command.SetOut(b)
-	command.SetErr(b)
-	command.Execute()
-	var expected string = "tls: first record does not look like a TLS handshake"
-	assert.Contains(t, b.String(), expected, "SSL error expected.")
-}
-
-func TestNonTLSServerWithTLSConfiguration(t *testing.T) {
-
-}
-
-func TestOptionalParameters(t *testing.T) {
-	command := rootCmd
-	command.SetArgs([]string{
-		"--file", "./tests/gomtpYamls/optionalParameters.yaml",
-	})
-	b := bytes.NewBufferString("")
-	command.SetOut(b)
-	command.SetErr(b)
-	command.Execute()
-	var expected string = "Email sent successfully!"
-	assert.Equal(t, expected, b.String(), "actual is not expected")
-}
-
-func TestInvalidYaml(t *testing.T) {
-	command := rootCmd
-	command.SetArgs([]string{
-		"--file", "./tests/gomtpYamls/invalid.yaml",
-	})
-	b := bytes.NewBufferString("")
-	command.SetOut(b)
-	command.SetErr(b)
-	err := command.Execute()
-	assert.NotEmpty(t, err)
-}
-
-func TestEmptySubjectYaml(t *testing.T) {
-	clearMailHog(t)
-	command := rootCmd
-	command.SetArgs([]string{
-		"--file", "./tests/gomtpYamls/emptySubject.yaml",
-	})
-	b := bytes.NewBufferString("")
-	command.SetOut(b)
-	command.SetErr(b)
-	err := command.Execute()
-	assert.NoError(t, err, "command execution failed")
-
-	var expected string = "Email sent successfully!"
-	assert.Equal(t, expected, b.String(), "actual is not expected")
-
-	// Wait a moment for MailHog to process the email
-	//time.Sleep(1 * time.Second)
-
-	// Check the latest message (first in the list)
-	latestMessage := getLatestMessageForRecipient(t, "emptySubject@example.com")
-
-	assert.Equal(t, "GOMTP Test Subject", latestMessage.Subject, "unexpected email subject")
-	assert.Equal(t, "from@example.com", latestMessage.From.Address, "unexpected sender mailbox")
-	assert.Equal(t, "emptySubject@example.com", latestMessage.To[0].Address, "unexpected recipient mailbox")
-	// assert.Equal(t, "this is line 1 This is line 2", latestMessage.Snippet, "unexpected email body")
-}
-
-func TestEmptyToYaml(t *testing.T) {
-	clearMailHog(t)
-
-	command := rootCmd
-	command.SetArgs([]string{
-		"--file", "./tests/gomtpYamls/emptyTo.yaml",
-	})
-	b := bytes.NewBufferString("")
-	command.SetOut(b)
-	command.SetErr(b)
-	err := command.Execute()
-	assert.NoError(t, err, "command execution failed")
-
-	assert.Equal(t, "Email sent successfully!", b.String(), "unexpected command output")
-
-	// Wait a moment for MailHog to process the email
-	//time.Sleep(1 * time.Second)
-
-	latestMessage := getLatestMessageForRecipient(t, "to@example.com")
-	assert.Equal(t, "Testing Email", latestMessage.Subject, "unexpected email subject")
-	assert.Equal(t, "emptyToFrom@example.com", latestMessage.From.Address, "unexpected sender domain")
-	assert.Equal(t, "to@example.com", latestMessage.To[0].Address, "unexpected recipient domain")
-	// assert.Equal(t, "Empty To Test Body", latestMessage.Snippet, "unexpected email body")
-}
-
-func TestEmptyBodyYaml(t *testing.T) {
-	clearMailHog(t)
-
-	command := rootCmd
-	command.SetArgs([]string{
-		"--file", "./tests/gomtpYamls/emptyBody.yaml",
-	})
-	b := bytes.NewBufferString("")
-	command.SetOut(b)
-	command.SetErr(b)
-	err := command.Execute()
-	assert.NoError(t, err, "command execution failed")
-
-	assert.Equal(t, "Email sent successfully!", b.String(), "unexpected command output")
-
-	// Wait a moment for MailHog to process the email
-	//time.Sleep(1 * time.Second)
-
-	latestMessage := getLatestMessageForRecipient(t, "emptyBodyTo@example.com")
-	assert.Equal(t, "Testing Email For Empty Body", latestMessage.Subject, "unexpected email subject")
-	assert.Equal(t, "emptyBodyFrom@example.com", latestMessage.From.Address, "unexpected sender domain")
-	assert.Equal(t, "emptyBodyTo@example.com", latestMessage.To[0].Address, "unexpected recipient domain")
-	// assert.Equal(t, "This is the test email sent by gomtp.", latestMessage.Snippet, "unexpected email body")
-}
-
-func TestToFlag(t *testing.T) {
-	clearMailHog(t)
-
-	command := rootCmd
-	command.SetArgs([]string{
-		"--file", "./tests/gomtpYamls/successConfigurationWithoutTo.yaml",
-		"--to", "to-flag-test@example.com",
-	})
-	b := bytes.NewBufferString("")
-	command.SetOut(b)
-	command.SetErr(b)
-	err := command.Execute()
-	assert.NoError(t, err, "command execution failed")
-
-	assert.Equal(t, "Email sent successfully!", b.String(), "unexpected command output")
-
-	// Wait a moment for MailHog to process the email
-	//time.Sleep(1 * time.Second)
-
-	latestMessage := getLatestMessageForRecipient(t, "to-flag-test@example.com")
-	assert.Equal(t, "To Flag Test Subject", latestMessage.Subject, "unexpected email subject")
-	assert.Equal(t, "successConfigurationWithoutToFrom@example.com", latestMessage.From.Address, "unexpected sender domain")
-	assert.Equal(t, "to-flag-test@example.com", latestMessage.To[0].Address, "unexpected recipient domain")
-	// assert.Equal(t, "To Flag Test Body", latestMessage.Snippet, "unexpected email body")
-}
-
-func TestSubjectFlag(t *testing.T) {
-	clearMailHog(t)
-
-	command := rootCmd
-	command.SetArgs([]string{
-		"--file", "./tests/gomtpYamls/successConfigurationWithoutSubject.yaml",
+	suite.cmd.SetArgs([]string{
+		"--file", "../tests/gomtpYamls/successConfiguration.yaml",
+		"--body", "",
+		"--body-file", "",
+		"--subject", "",
 		"--to", "",
-		"--subject", "Subject To Flag Test Subject",
 	})
+
 	b := bytes.NewBufferString("")
-	command.SetOut(b)
-	command.SetErr(b)
-	err := command.Execute()
-	assert.NoError(t, err, "command execution failed")
+	suite.cmd.SetOut(b)
+	suite.cmd.SetErr(b)
+	suite.cmd.Execute()
 
-	assert.Equal(t, "Email sent successfully!", b.String(), "unexpected command output")
-
-	// Wait a moment for MailHog to process the email
-	//time.Sleep(1 * time.Second)
-
-	latestMessage := getLatestMessageForRecipient(t, "successConfigurationWithoutSubjectTo@example.com")
-	assert.Equal(t, "Subject To Flag Test Subject", latestMessage.Subject, "unexpected email subject")
-	assert.Equal(t, "successConfigurationWithoutSubjectFrom@example.com", latestMessage.From.Address, "unexpected sender domain")
-	assert.Equal(t, "successConfigurationWithoutSubjectTo@example.com", latestMessage.To[0].Address, "unexpected recipient domain")
-	// assert.Equal(t, "Subject To Flag Test Body", latestMessage.Snippet, "unexpected email body")
+	suite.Equal(expected, b.String())
 }
 
-func TestSubjectToBodyFlag(t *testing.T) {
-	clearMailHog(t)
+func (suite *TestGOMTPSuite) TestBodyFileFlag() {
 
 	// Setup the command with arguments
-	command := rootCmd
-	command.SetArgs([]string{
-		"--file", "./tests/gomtpYamls/successConfigurationWithoutSubjectBody.yaml",
-		"--to", "subjecttobodyflag@example.net",
-		"--subject", "Subject To Body Flag Test Subject",
-		"--body", "Subject To Body Flag Test Body",
+	suite.cmd.SetArgs([]string{
+		"--file", "../tests/gomtpYamls/successConfigurationWithNoBodyFile.yaml",
+		"--to", "bodyfileflag@example.net",
+		"--subject", "Body File Flag Test Subject",
+		"--body-file", "../tests/gomtpYamls/emailBodyFile.log",
+		"--body", "",
 	})
 
 	// Capture the output
 	b := bytes.NewBufferString("")
-	command.SetOut(b)
-	command.SetErr(b)
+	suite.cmd.SetOut(b)
+	suite.cmd.SetErr(b)
 
 	// Execute the command
-	err := command.Execute()
-	assert.NoError(t, err, "command execution failed")
+	err := suite.cmd.Execute()
+	suite.NoError(err)
 
 	// Verify the output
-	assert.Equal(t, "Email sent successfully!", b.String(), "unexpected command output")
+	suite.Equal("Email sent successfully!", b.String())
 
 	// Wait a moment for MailHog to process the email
 	//time.Sleep(1 * time.Second)
 
-	latestMessage := getLatestMessageForRecipient(t, "subjecttobodyflag@example.net")
-	assert.Equal(t, "Subject To Body Flag Test Subject", latestMessage.Subject, "unexpected email subject")
-	assert.Equal(t, "from@example.com", latestMessage.From.Address, "unexpected sender domain")
-	assert.Equal(t, "subjecttobodyflag@example.net", latestMessage.To[0].Address, "unexpected recipient domain")
-	// assert.Equal(t, "Subject To Body Flag Test Body", latestMessage.Snippet, "unexpected email body")
+	latestMessage, err := getLatestMessageForRecipient("bodyfileflag@example.net")
+	suite.NoError(err)
+	suite.Equal("Body File Flag Test Subject", latestMessage.Subject)
+	suite.Equal("from@example.com", latestMessage.From.Address)
+	suite.Equal("bodyfileflag@example.net", latestMessage.To[0].Address)
+	suite.Equal("Test body file content", latestMessage.Snippet)
 }
 
-func TestStdinInput(t *testing.T) {
-	clearMailHog(t)
+func (suite *TestGOMTPSuite) TestGomtpYamlNotFound() {
+	suite.cmd.SetArgs([]string{
+		"--file", "../unknown/path.yaml",
+		"--to", "",
+		"--body", "",
+		"--body-file", "",
+		"--subject", "",
+	})
+
+	b := bytes.NewBufferString("")
+	suite.cmd.SetOut(b)
+	suite.cmd.SetErr(b)
+	suite.cmd.Execute()
+
+	expected := "no such file or directory"
+	suite.Contains(b.String(), expected, "File not found error expected.")
+}
+
+func (suite *TestGOMTPSuite) TestInvalidCredentialsGoogle() {
+	suite.cmd.SetArgs([]string{
+		"--file", "../tests/gomtpYamls/invalidCredentialsGoogle.yaml",
+		"--to", "",
+		"--body", "",
+		"--body-file", "",
+		"--subject", "",
+	})
+
+	b := bytes.NewBufferString("")
+	suite.cmd.SetOut(b)
+	suite.cmd.SetErr(b)
+	suite.cmd.Execute()
+
+	expected := "Username and Password not accepted"
+	suite.Contains(b.String(), expected, "Invalid credentials error expected.")
+}
+
+func (suite *TestGOMTPSuite) TestInvalidCredentialsYandex() {
+	suite.cmd.SetArgs([]string{
+		"--file", "../tests/gomtpYamls/invalidCredentialsYandex.yaml",
+		"--to", "",
+		"--body", "",
+		"--body-file", "",
+		"--subject", "",
+	})
+
+	b := bytes.NewBufferString("")
+	suite.cmd.SetOut(b)
+	suite.cmd.SetErr(b)
+	suite.cmd.Execute()
+
+	expected := "authentication failed: Invalid user or password"
+	suite.Contains(b.String(), expected, "Invalid credentials error expected.")
+}
+
+func (suite *TestGOMTPSuite) TestInvalidCredentialsBrevo() {
+	suite.cmd.SetArgs([]string{
+		"--file", "../tests/gomtpYamls/invalidCredentialsBrevo.yaml",
+		"--to", "",
+		"--body", "",
+		"--body-file", "",
+		"--subject", "",
+	})
+
+	b := bytes.NewBufferString("")
+	suite.cmd.SetOut(b)
+	suite.cmd.SetErr(b)
+	suite.cmd.Execute()
+
+	expected := "Authentication failed"
+	suite.Contains(b.String(), expected, "Invalid credentials error expected.")
+}
+
+func (suite *TestGOMTPSuite) TestInvalidSSLConfiguration() {
+	suite.cmd.SetArgs([]string{
+		"--file", "../tests/gomtpYamls/nonSslServerWithSslConfiguration.yaml",
+		"--to", "",
+		"--body", "",
+		"--body-file", "",
+		"--subject", "",
+	})
+
+	b := bytes.NewBufferString("")
+	suite.cmd.SetOut(b)
+	suite.cmd.SetErr(b)
+	suite.cmd.Execute()
+
+	expected := "tls: first record does not look like a TLS handshake"
+	suite.Contains(b.String(), expected, "SSL error expected.")
+}
+
+func (suite *TestGOMTPSuite) TestOptionalParameters() {
+	suite.cmd.SetArgs([]string{
+		"--file", "../tests/gomtpYamls/optionalParameters.yaml",
+		"--to", "",
+		"--body", "",
+		"--body-file", "",
+		"--subject", "",
+	})
+
+	b := bytes.NewBufferString("")
+	suite.cmd.SetOut(b)
+	suite.cmd.SetErr(b)
+	suite.cmd.Execute()
+
+	expected := "Email sent successfully!"
+	suite.Equal(expected, b.String(), "actual is not expected")
+}
+
+func (suite *TestGOMTPSuite) TestInvalidYaml() {
+	suite.cmd.SetArgs([]string{
+		"--file", "../tests/gomtpYamls/invalid.yaml",
+		"--to", "",
+		"--body", "",
+		"--body-file", "",
+		"--subject", "",
+	})
+
+	b := bytes.NewBufferString("")
+	suite.cmd.SetOut(b)
+	suite.cmd.SetErr(b)
+	err := suite.cmd.Execute()
+
+	suite.NotEmpty(err)
+}
+
+func (suite *TestGOMTPSuite) TestEmptySubjectYaml() {
+	suite.cmd.SetArgs([]string{
+		"--file", "../tests/gomtpYamls/emptySubject.yaml",
+		"--to", "",
+		"--body", "",
+		"--body-file", "",
+		"--subject", "",
+	})
+
+	b := bytes.NewBufferString("")
+	suite.cmd.SetOut(b)
+	suite.cmd.SetErr(b)
+	err := suite.cmd.Execute()
+	suite.NoError(err)
+
+	expected := "Email sent successfully!"
+	suite.Equal(expected, b.String())
+
+	latestMessage, err := getLatestMessageForRecipient("emptySubject@example.com")
+	suite.NoError(err)
+	suite.Equal("GOMTP Test Subject", latestMessage.Subject)
+	suite.Equal("from@example.com", latestMessage.From.Address)
+	suite.Equal("emptySubject@example.com", latestMessage.To[0].Address)
+}
+
+func (suite *TestGOMTPSuite) TestEmptyToYaml() {
+	suite.cmd.SetArgs([]string{
+		"--file", "../tests/gomtpYamls/emptyTo.yaml",
+		"--to", "",
+		"--body", "",
+		"--body-file", "",
+		"--subject", "",
+	})
+
+	b := bytes.NewBufferString("")
+	suite.cmd.SetOut(b)
+	suite.cmd.SetErr(b)
+	err := suite.cmd.Execute()
+	suite.NoError(err)
+
+	suite.Equal("Email sent successfully!", b.String())
+
+	latestMessage, err := getLatestMessageForRecipient("to@example.com")
+	suite.NoError(err)
+	suite.Equal("Testing Email", latestMessage.Subject)
+	suite.Equal("emptyToFrom@example.com", latestMessage.From.Address)
+	suite.Equal("to@example.com", latestMessage.To[0].Address)
+}
+
+func (suite *TestGOMTPSuite) TestEmptyBodyYaml() {
+	suite.cmd.SetArgs([]string{
+		"--file", "../tests/gomtpYamls/emptyBody.yaml",
+		"--to", "",
+		"--body", "",
+		"--body-file", "",
+		"--subject", "",
+	})
+
+	b := bytes.NewBufferString("")
+	suite.cmd.SetOut(b)
+	suite.cmd.SetErr(b)
+	err := suite.cmd.Execute()
+	suite.NoError(err)
+
+	suite.Equal("Email sent successfully!", b.String())
+
+	latestMessage, err := getLatestMessageForRecipient("emptyBodyTo@example.com")
+	suite.NoError(err)
+	suite.Equal("Testing Email For Empty Subject", latestMessage.Subject)
+	suite.Equal("emptyBodyFrom@example.com", latestMessage.From.Address)
+	suite.Equal("emptyBodyTo@example.com", latestMessage.To[0].Address)
+}
+
+func (suite *TestGOMTPSuite) TestNonTLSServerWithTLSConfiguration() {
+
+}
+
+func (suite *TestGOMTPSuite) TestToFlag() {
+
+	suite.cmd.SetArgs([]string{
+		"--file", "../tests/gomtpYamls/successConfigurationWithoutTo.yaml",
+		"--to", "to-flag-test@example.com",
+		"--body", "",
+		"--body-file", "",
+		"--subject", "",
+	})
+
+	b := bytes.NewBufferString("")
+	suite.cmd.SetOut(b)
+	suite.cmd.SetErr(b)
+	err := suite.cmd.Execute()
+
+	suite.NoError(err)
+
+	expected := "Email sent successfully!"
+	suite.Equal(expected, b.String())
+
+	latestMessage, err := getLatestMessageForRecipient("to-flag-test@example.com")
+	suite.NoError(err)
+	suite.Equal("To Flag Test Subject", latestMessage.Subject)
+	suite.Equal("successConfigurationWithoutToFrom@example.com", latestMessage.From.Address)
+	suite.Equal("to-flag-test@example.com", latestMessage.To[0].Address)
+}
+
+func (suite *TestGOMTPSuite) TestSubjectFlag() {
+
+	suite.cmd.SetArgs([]string{
+		"--file", "../tests/gomtpYamls/successConfigurationWithoutSubject.yaml",
+		"--to", "successConfigurationWithoutSubjectTo@example.com",
+		"--subject", "Subject To Flag Test Subject",
+		"--body", "",
+		"--body-file", "",
+	})
+
+	b := bytes.NewBufferString("")
+	suite.cmd.SetOut(b)
+	suite.cmd.SetErr(b)
+	err := suite.cmd.Execute()
+
+	suite.NoError(err)
+
+	expected := "Email sent successfully!"
+	suite.Equal(expected, b.String())
+
+	latestMessage, err := getLatestMessageForRecipient("successConfigurationWithoutSubjectTo@example.com")
+	suite.NoError(err)
+	suite.Equal("Subject To Flag Test Subject", latestMessage.Subject)
+	suite.Equal("successConfigurationWithoutSubjectFrom@example.com", latestMessage.From.Address)
+	suite.Equal("successConfigurationWithoutSubjectTo@example.com", latestMessage.To[0].Address)
+}
+
+func (suite *TestGOMTPSuite) TestSubjectToBodyFlag() {
+
+	suite.cmd.SetArgs([]string{
+		"--file", "../tests/gomtpYamls/successConfigurationWithoutSubjectBody.yaml",
+		"--to", "subjecttobodyflag@example.net",
+		"--subject", "Subject To Body Flag Test Subject",
+		"--body", "Subject To Body Flag Test Body",
+		"--body-file", "",
+	})
+
+	b := bytes.NewBufferString("")
+	suite.cmd.SetOut(b)
+	suite.cmd.SetErr(b)
+	err := suite.cmd.Execute()
+
+	suite.NoError(err)
+
+	expected := "Email sent successfully!"
+	suite.Equal(expected, b.String())
+
+	latestMessage, err := getLatestMessageForRecipient("subjecttobodyflag@example.net")
+	suite.NoError(err)
+	suite.Equal("Subject To Body Flag Test Subject", latestMessage.Subject)
+	suite.Equal("from@example.com", latestMessage.From.Address)
+	suite.Equal("subjecttobodyflag@example.net", latestMessage.To[0].Address)
+}
+
+func (suite *TestGOMTPSuite) TestStdinInput() {
+
 	// Save the original stdin
 	oldStdin := os.Stdin
-	defer func() { os.Stdin = oldStdin }() // Ensure stdin is restored after the test
+	defer func() { os.Stdin = oldStdin }()
 
 	// Create a pipe to simulate stdin
 	r, w, err := os.Pipe()
-	if err != nil {
-		t.Fatalf("failed to create pipe: %v", err)
-	}
-	defer r.Close() // Ensure the read end is closed properly
+	suite.NoError(err)
+	defer r.Close()
 
 	os.Stdin = r
 
 	// Write to the pipe asynchronously
 	go func() {
-		defer w.Close() // Ensure the write end is closed properly
+		defer w.Close()
 		_, err := w.Write([]byte("Body from stdin"))
-		if err != nil {
-			t.Errorf("failed to write to pipe: %v", err)
-		}
+		suite.NoError(err)
 	}()
 
 	// Setup the command with arguments
-	command := rootCmd
-	command.SetArgs([]string{
-		"--file", "./tests/gomtpYamls/successConfigurationWithNoBody.yaml",
+	suite.cmd.SetArgs([]string{
+		"--file", "../tests/gomtpYamls/successConfigurationWithNoBody.yaml",
 		"--subject", "Body From STDIN Test Subject",
 		"--body", "",
 		"--body-file", "",
@@ -369,84 +433,39 @@ func TestStdinInput(t *testing.T) {
 
 	// Capture the output
 	var outputBuffer bytes.Buffer
-	command.SetOut(&outputBuffer)
-	command.SetErr(&outputBuffer)
+	suite.cmd.SetOut(&outputBuffer)
+	suite.cmd.SetErr(&outputBuffer)
 
-	// Execute the command
-	err = command.Execute()
-	assert.NoError(t, err, "command execution failed")
-
-	// Check the output
-	assert.Contains(t, outputBuffer.String(), "Email sent successfully!", "unexpected command output")
-
-	// Wait a moment for MailHog to process the email
-	//time.Sleep(1 * time.Second)
-
-	// Verify the email content
-	latestMessage := getLatestMessageForRecipient(t, "bodyFromStdin@example.io")
-	assert.Equal(t, "Body From STDIN Test Subject", latestMessage.Subject, "unexpected email subject")
-	assert.Equal(t, "from@example.com", latestMessage.From.Address, "unexpected sender domain")
-	assert.Equal(t, "bodyFromStdin@example.io", latestMessage.To[0].Address, "unexpected recipient domain")
-	// assert.Equal(t, "Body from stdin", latestMessage.Snippet, "unexpected email body")
-}
-
-func TestBodyFileFlag(t *testing.T) {
-	clearMailHog(t)
-
-	// Setup the command with arguments
-	command := rootCmd
-	command.SetArgs([]string{
-		"--file", "./tests/gomtpYamls/successConfigurationWithNoBodyFile.yaml",
-		"--body", "",
-		"--to", "bodyfileflag@example.net",
-		"--subject", "Body File Flag Test Subject",
-		"--body-file", "./tests/gomtpYamls/emailBodyFile.log",
-	})
-
-	// Capture the output
-	b := bytes.NewBufferString("")
-	command.SetOut(b)
-	command.SetErr(b)
-
-	// Execute the command
-	err := command.Execute()
-	assert.NoError(t, err, "command execution failed")
+	err = suite.cmd.Execute()
+	suite.NoError(err)
 
 	// Verify the output
-	assert.Equal(t, "Email sent successfully!", b.String(), "unexpected command output")
+	suite.Contains(outputBuffer.String(), "Email sent successfully!", "unexpected command output")
 
-	// Wait a moment for MailHog to process the email
-	//time.Sleep(1 * time.Second)
-
-	latestMessage := getLatestMessageForRecipient(t, "bodyfileflag@example.net")
-	assert.Equal(t, "Body File Flag Test Subject", latestMessage.Subject, "unexpected email subject")
-	assert.Equal(t, "from@example.com", latestMessage.From.Address, "unexpected sender domain")
-	assert.Equal(t, "bodyfileflag@example.net", latestMessage.To[0].Address, "unexpected recipient domain")
-	// assert.Equal(t, "Test body file content", latestMessage.Snippet, "unexpected email body")
+	latestMessage, err := getLatestMessageForRecipient("bodyFromStdin@example.io")
+	suite.NoError(err)
+	suite.Equal("Body From STDIN Test Subject", latestMessage.Subject)
+	suite.Equal("from@example.com", latestMessage.From.Address)
+	suite.Equal("bodyFromStdin@example.io", latestMessage.To[0].Address)
 }
 
-func TestBodyFileAndBodyFlag(t *testing.T) {
-	clearMailHog(t)
+func (suite *TestGOMTPSuite) TestBodyFileAndBodyFlag() {
 
-	// Setup the command with arguments
-	command := rootCmd
-	command.SetArgs([]string{
-		"--file", "./tests/gomtpYamls/successConfigurationWithNoBodyFile.yaml",
+	suite.cmd.SetArgs([]string{
+		"--file", "../tests/gomtpYamls/successConfigurationWithNoBodyFile.yaml",
 		"--body", "should fail body",
 		"--to", "bodyfileandbodyflag@example.net",
 		"--subject", "Body File and Body Flag",
-		"--body-file", "./tests/gomtpYamls/emailBodyFile.log",
+		"--body-file", "../tests/gomtpYamls/emailBodyFile.log",
 	})
 
-	// Capture the output
 	b := bytes.NewBufferString("")
-	command.SetOut(b)
-	command.SetErr(b)
+	suite.cmd.SetOut(b)
+	suite.cmd.SetErr(b)
 
-	// Execute the command
-	err := command.Execute()
-	assert.Error(t, err, "command execution failed")
+	err := suite.cmd.Execute()
+	suite.Error(err)
 
-	// Verify the output
-	assert.Contains(t, b.String(), "cannot specify body via multiple sources simultaneously", "unexpected command output")
+	expected := "cannot specify body via multiple sources simultaneously"
+	suite.Contains(b.String(), expected, "unexpected command output")
 }

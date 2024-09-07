@@ -20,13 +20,10 @@ jobs:
           docker compose up -d
           while [ "`docker inspect -f {{.State.Health.Status}} mailpit`" != "healthy" ]; do sleep 0.1; done
 
-      - name: Compile the Test
-        run: go test -p 1 -coverprofile=coverage.out -c -o gomtp.test ./cmd/
-
       - name: Test the Application
         run: | 
           set -e
-          ./gomtp.test -test.coverprofile ./c.out | tee testCoverage.out
+          go test -p 1 ./cmd/ -coverprofile=coverage.out | tee testCoverage.out
           exit ${PIPESTATUS[0]}
 
       - name: Check Coverage If Higher Than 85
