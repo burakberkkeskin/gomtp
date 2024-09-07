@@ -21,7 +21,7 @@ jobs:
           while [ "`docker inspect -f {{.State.Health.Status}} mailpit`" != "healthy" ]; do sleep 0.1; done
 
       - name: Compile the Test
-        run: go test -coverprofile=coverage.out -c -o gomtp.test ./cmd/
+        run: go test -p 1 -coverprofile=coverage.out -c -o gomtp.test ./cmd/
 
       - name: Test the Application
         run: | 
