@@ -159,6 +159,16 @@ func TestEmptySubjectYaml(t *testing.T) {
 	// Wait a moment for MailHog to process the email
 	time.Sleep(1 * time.Second)
 
+	resp, err := http.Get("http://localhost:8025/api/v2/messages")
+	assert.NoError(t, err, "failed to get messages from MailHog")
+	defer resp.Body.Close()
+	// Read the response body
+	body, err := io.ReadAll(resp.Body)
+	assert.NoError(t, err, "failed to read response body")
+
+	// Print the response body
+	fmt.Println("Response Body:", string(body))
+
 	// Check the latest message (first in the list)
 	latestMessage := getLatestMessageForRecipient(t, "emptySubject@example.com")
 
@@ -297,12 +307,7 @@ func getLatestMessageForRecipient(t *testing.T, recipient string) MailhogMessage
 	resp, err := http.Get("http://localhost:8025/api/v2/messages")
 	assert.NoError(t, err, "failed to get messages from MailHog")
 	defer resp.Body.Close()
-	// Read the response body
-	body, err := io.ReadAll(resp.Body)
-	assert.NoError(t, err, "failed to read response body")
 
-	// Print the response body
-	fmt.Println("Response Body:", string(body))
 	var mailhogResp MailhogResponse
 	err = json.NewDecoder(resp.Body).Decode(&mailhogResp)
 	assert.NoError(t, err, "failed to decode MailHog response")
