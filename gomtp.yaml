@@ -1,14 +1,14 @@
-username: ''
-password: ''
+username: 'user2'
+password: "password2"
 from: 'from@example.com'
 host: '127.0.0.1'
 port: 1025
 ssl: false
-tls: false
-auth: 'NO' # You can 'LOGIN' if smtp needs auth.
+tls: true
+auth: 'LOGIN' # You can 'LOGIN' if smtp needs auth.
 verifyCertificate: true
-# to: 'to@example.com'
-# subject: 'Testing Email'
-# body: |
-#   this is line 1
-#   This is line 2
+to: 'to@example.com'
+subject: 'Testing Email'
+body: |
+  this is line 1
+  This is line 2

@@ -1,0 +1,26 @@
+services:
+  mailpit:
+    image: axllent/mailpit:v1.20.4
+    container_name: mailpit
+    restart: unless-stopped
+    volumes:
+      - ./mailpit-data:/data
+      - ./config:/test
+    ports:
+      - 8025:8025
+      - 1025:1025
+    environment:
+      MP_MAX_MESSAGES: 5000
+      MP_DATABASE: /data/mailpit.db
+      MP_SMTP_AUTH_ALLOW_INSECURE: false
+      MP_SMTP_TLS_CERT: "/test/fullchain.crt"
+      MP_SMTP_TLS_KEY: "/test/private.key"
+      MP_SMTP_REQUIRE_STARTTLS: true
+      # MP_SMTP_REQUIRE_TLS: true
+      MP_SMTP_AUTH: "user1:password1 user2:test\\password"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8025/readyz"]
+      interval: "1s"
+      retries: 10
+      start_period: 1s
+      start_interval: 1s
