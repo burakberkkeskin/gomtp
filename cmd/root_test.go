@@ -20,10 +20,6 @@ type MailhogMessage struct {
 	To      []MailhogAddress `json:"To"`
 	Subject string           `json:"Subject"`
 	Snippet string           `json:"Snippet"`
-	// Content struct {
-	// 	Headers map[string][]string `json:"Headers"`
-	// 	Body    string              `json:"Body"`
-	// } `json:"Content"`
 }
 
 type MailhogAddress struct {
@@ -64,114 +60,114 @@ func clearMailHog(t *testing.T) {
 	assert.Equal(t, http.StatusOK, resp.StatusCode, "unexpected status code when clearing MailHog")
 }
 
-// func TestHappyPath(t *testing.T) {
-// 	command := rootCmd
-// 	command.SetArgs([]string{
-// 		"--file", "./tests/gomtpYamls/successConfiguration.yaml",
-// 	})
-// 	b := bytes.NewBufferString("")
-// 	command.SetOut(b)
-// 	command.SetErr(b)
-// 	command.Execute()
-// 	var expected string = "Email sent successfully!"
-// 	assert.Equal(t, expected, b.String(), "actual is not expected")
-// }
+func TestHappyPath(t *testing.T) {
+	command := rootCmd
+	command.SetArgs([]string{
+		"--file", "./tests/gomtpYamls/successConfiguration.yaml",
+	})
+	b := bytes.NewBufferString("")
+	command.SetOut(b)
+	command.SetErr(b)
+	command.Execute()
+	var expected string = "Email sent successfully!"
+	assert.Equal(t, expected, b.String(), "actual is not expected")
+}
 
-// func TestGomtpYamlNotFound(t *testing.T) {
-// 	command := rootCmd
-// 	b := bytes.NewBufferString("")
-// 	command.SetArgs([]string{
-// 		"--file", "./unknown/path.yaml",
-// 	})
-// 	command.SetOut(b)
-// 	command.SetErr(b)
-// 	command.Execute()
-// 	var expected string = "no such file or directory"
-// 	assert.Contains(t, b.String(), expected, "File not found error expected.")
-// }
+func TestGomtpYamlNotFound(t *testing.T) {
+	command := rootCmd
+	b := bytes.NewBufferString("")
+	command.SetArgs([]string{
+		"--file", "./unknown/path.yaml",
+	})
+	command.SetOut(b)
+	command.SetErr(b)
+	command.Execute()
+	var expected string = "no such file or directory"
+	assert.Contains(t, b.String(), expected, "File not found error expected.")
+}
 
-// func TestInvalidCredentialsGoogle(t *testing.T) {
-// 	command := rootCmd
-// 	b := bytes.NewBufferString("")
-// 	command.SetArgs([]string{
-// 		"--file", "./tests/gomtpYamls/invalidCredentialsGoogle.yaml",
-// 	})
-// 	command.SetOut(b)
-// 	command.SetErr(b)
-// 	command.Execute()
-// 	var expected string = "Username and Password not accepted"
-// 	assert.Contains(t, b.String(), expected, "Invalid credentials error expected.")
-// }
+func TestInvalidCredentialsGoogle(t *testing.T) {
+	command := rootCmd
+	b := bytes.NewBufferString("")
+	command.SetArgs([]string{
+		"--file", "./tests/gomtpYamls/invalidCredentialsGoogle.yaml",
+	})
+	command.SetOut(b)
+	command.SetErr(b)
+	command.Execute()
+	var expected string = "Username and Password not accepted"
+	assert.Contains(t, b.String(), expected, "Invalid credentials error expected.")
+}
 
-// func TestInvalidCredentialsYandex(t *testing.T) {
-// 	command := rootCmd
-// 	b := bytes.NewBufferString("")
-// 	command.SetArgs([]string{
-// 		"--file", "./tests/gomtpYamls/invalidCredentialsYandex.yaml",
-// 	})
-// 	command.SetOut(b)
-// 	command.SetErr(b)
-// 	command.Execute()
-// 	var expected string = "authentication failed: Invalid user or password"
-// 	assert.Contains(t, b.String(), expected, "Invalid credentials error expected.")
+func TestInvalidCredentialsYandex(t *testing.T) {
+	command := rootCmd
+	b := bytes.NewBufferString("")
+	command.SetArgs([]string{
+		"--file", "./tests/gomtpYamls/invalidCredentialsYandex.yaml",
+	})
+	command.SetOut(b)
+	command.SetErr(b)
+	command.Execute()
+	var expected string = "authentication failed: Invalid user or password"
+	assert.Contains(t, b.String(), expected, "Invalid credentials error expected.")
 
-// }
+}
 
-// func TestInvalidCredentialsBrevo(t *testing.T) {
-// 	command := rootCmd
-// 	b := bytes.NewBufferString("")
-// 	command.SetArgs([]string{
-// 		"--file", "./tests/gomtpYamls/invalidCredentialsBrevo.yaml",
-// 	})
-// 	command.SetOut(b)
-// 	command.SetErr(b)
-// 	command.Execute()
-// 	var expected string = "Authentication failed"
-// 	assert.Contains(t, b.String(), expected, "Invalid credentials error expected.")
+func TestInvalidCredentialsBrevo(t *testing.T) {
+	command := rootCmd
+	b := bytes.NewBufferString("")
+	command.SetArgs([]string{
+		"--file", "./tests/gomtpYamls/invalidCredentialsBrevo.yaml",
+	})
+	command.SetOut(b)
+	command.SetErr(b)
+	command.Execute()
+	var expected string = "Authentication failed"
+	assert.Contains(t, b.String(), expected, "Invalid credentials error expected.")
 
-// }
+}
 
-// func TestInvalidSSLConfiguration(t *testing.T) {
-// 	command := rootCmd
-// 	b := bytes.NewBufferString("")
-// 	command.SetArgs([]string{
-// 		"--file", "./tests/gomtpYamls/nonSslServerWithSslConfiguration.yaml",
-// 	})
-// 	command.SetOut(b)
-// 	command.SetErr(b)
-// 	command.Execute()
-// 	var expected string = "tls: first record does not look like a TLS handshake"
-// 	assert.Contains(t, b.String(), expected, "SSL error expected.")
-// }
+func TestInvalidSSLConfiguration(t *testing.T) {
+	command := rootCmd
+	b := bytes.NewBufferString("")
+	command.SetArgs([]string{
+		"--file", "./tests/gomtpYamls/nonSslServerWithSslConfiguration.yaml",
+	})
+	command.SetOut(b)
+	command.SetErr(b)
+	command.Execute()
+	var expected string = "tls: first record does not look like a TLS handshake"
+	assert.Contains(t, b.String(), expected, "SSL error expected.")
+}
 
-// func TestNonTLSServerWithTLSConfiguration(t *testing.T) {
+func TestNonTLSServerWithTLSConfiguration(t *testing.T) {
 
-// }
+}
 
-// func TestOptionalParameters(t *testing.T) {
-// 	command := rootCmd
-// 	command.SetArgs([]string{
-// 		"--file", "./tests/gomtpYamls/optionalParameters.yaml",
-// 	})
-// 	b := bytes.NewBufferString("")
-// 	command.SetOut(b)
-// 	command.SetErr(b)
-// 	command.Execute()
-// 	var expected string = "Email sent successfully!"
-// 	assert.Equal(t, expected, b.String(), "actual is not expected")
-// }
+func TestOptionalParameters(t *testing.T) {
+	command := rootCmd
+	command.SetArgs([]string{
+		"--file", "./tests/gomtpYamls/optionalParameters.yaml",
+	})
+	b := bytes.NewBufferString("")
+	command.SetOut(b)
+	command.SetErr(b)
+	command.Execute()
+	var expected string = "Email sent successfully!"
+	assert.Equal(t, expected, b.String(), "actual is not expected")
+}
 
-// func TestInvalidYaml(t *testing.T) {
-// 	command := rootCmd
-// 	command.SetArgs([]string{
-// 		"--file", "./tests/gomtpYamls/invalid.yaml",
-// 	})
-// 	b := bytes.NewBufferString("")
-// 	command.SetOut(b)
-// 	command.SetErr(b)
-// 	err := command.Execute()
-// 	assert.NotEmpty(t, err)
-// }
+func TestInvalidYaml(t *testing.T) {
+	command := rootCmd
+	command.SetArgs([]string{
+		"--file", "./tests/gomtpYamls/invalid.yaml",
+	})
+	b := bytes.NewBufferString("")
+	command.SetOut(b)
+	command.SetErr(b)
+	err := command.Execute()
+	assert.NotEmpty(t, err)
+}
 
 func TestEmptySubjectYaml(t *testing.T) {
 	clearMailHog(t)
@@ -392,4 +388,65 @@ func TestStdinInput(t *testing.T) {
 	assert.Equal(t, "from@example.com", latestMessage.From.Address, "unexpected sender domain")
 	assert.Equal(t, "bodyFromStdin@example.io", latestMessage.To[0].Address, "unexpected recipient domain")
 	assert.Equal(t, "Body from stdin", latestMessage.Snippet, "unexpected email body")
+}
+
+func TestBodyFileFlag(t *testing.T) {
+	clearMailHog(t)
+
+	// Setup the command with arguments
+	command := rootCmd
+	command.SetArgs([]string{
+		"--file", "./tests/gomtpYamls/successConfigurationWithNoBodyFile.yaml",
+		"--body", "",
+		"--to", "bodyfileflag@example.net",
+		"--subject", "Body File Flag Test Subject",
+		"--body-file", "./tests/gomtpYamls/emailBodyFile.log",
+	})
+
+	// Capture the output
+	b := bytes.NewBufferString("")
+	command.SetOut(b)
+	command.SetErr(b)
+
+	// Execute the command
+	err := command.Execute()
+	assert.NoError(t, err, "command execution failed")
+
+	// Verify the output
+	assert.Equal(t, "Email sent successfully!", b.String(), "unexpected command output")
+
+	// Wait a moment for MailHog to process the email
+	//time.Sleep(1 * time.Second)
+
+	latestMessage := getLatestMessageForRecipient(t, "bodyfileflag@example.net")
+	assert.Equal(t, "Body File Flag Test Subject", latestMessage.Subject, "unexpected email subject")
+	assert.Equal(t, "from@example.com", latestMessage.From.Address, "unexpected sender domain")
+	assert.Equal(t, "bodyfileflag@example.net", latestMessage.To[0].Address, "unexpected recipient domain")
+	assert.Equal(t, "Test body file content", latestMessage.Snippet, "unexpected email body")
+}
+
+func TestBodyFileAndBodyFlag(t *testing.T) {
+	clearMailHog(t)
+
+	// Setup the command with arguments
+	command := rootCmd
+	command.SetArgs([]string{
+		"--file", "./tests/gomtpYamls/successConfigurationWithNoBodyFile.yaml",
+		"--body", "should fail body",
+		"--to", "bodyfileandbodyflag@example.net",
+		"--subject", "Body File and Body Flag",
+		"--body-file", "./tests/gomtpYamls/emailBodyFile.log",
+	})
+
+	// Capture the output
+	b := bytes.NewBufferString("")
+	command.SetOut(b)
+	command.SetErr(b)
+
+	// Execute the command
+	err := command.Execute()
+	assert.Error(t, err, "command execution failed")
+
+	// Verify the output
+	assert.Contains(t, b.String(), "cannot specify body via multiple sources simultaneously", "unexpected command output")
 }
