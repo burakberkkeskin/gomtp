@@ -23,18 +23,19 @@ var version string
 var commitId string
 
 type EmailConfig struct {
-	Username          string `yaml:"username"`
-	Password          string `yaml:"password"`
-	From              string `yaml:"from"`
-	To                string `yaml:"to"`
-	Host              string `yaml:"host"`
-	Port              int    `yaml:"port"`
-	SSL               bool   `yaml:"ssl"`
-	TLS               bool   `yaml:"tls"`
-	Auth              string `yaml:"auth"`
-	VerifyCertificate bool   `default:"true" yaml:"verifyCertificate"`
-	Subject           string `yaml:"subject"`
-	Body              string `yaml:"body"`
+	Username          string   `yaml:"username"`
+	Password          string   `yaml:"password"`
+	From              string   `yaml:"from"`
+	To                string   `yaml:"to"`
+	Host              string   `yaml:"host"`
+	Port              int      `yaml:"port"`
+	SSL               bool     `yaml:"ssl"`
+	TLS               bool     `yaml:"tls"`
+	Auth              string   `yaml:"auth"`
+	VerifyCertificate bool     `default:"true" yaml:"verifyCertificate"`
+	Subject           string   `yaml:"subject"`
+	Body              string   `yaml:"body"`
+	CcList            []string `yaml:"cc"`
 }
 
 const usageMessage = `Example Commands: 
@@ -159,6 +160,9 @@ func createEmailMessage(emailConfig *EmailConfig) *gomail.Message {
 	m.SetHeader("To", emailConfig.To)
 	m.SetHeader("Subject", emailConfig.Subject)
 	m.SetBody("text/plain", emailConfig.Body)
+	if len(emailConfig.CcList) > 0 {
+		m.SetHeader("Cc", emailConfig.CcList...)
+	}
 	return m
 }
 
