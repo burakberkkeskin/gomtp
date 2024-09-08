@@ -61,75 +61,112 @@ func rootRun(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+
+	// Read the email body from stdin if provided
+	stdioBody, err := readBodyFromStdin()
+	if err != nil {
+		return err
+	}
+
+	// Set body input
+	err = setBody(&emailConfig, stdioBody)
+	if err != nil {
+		return err
+	}
+
+	setupDefaultEmailConfig(&emailConfig)
+
+	setFlags(&emailConfig)
+
+	// Create the email message
+	emailMessage := createEmailMessage(&emailConfig)
+
+	err = sendEmail(&emailConfig, emailMessage)
+	if err != nil {
+		return err
+	}
+
+	cmd.Printf("Email sent successfully!")
+	return nil
+}
+
+// Setup default values for flags, get the email config pointer.
+func setupDefaultEmailConfig(emailConfig *EmailConfig) {
 	// Set default values for subject and body if they are empty
 	if emailConfig.Subject == "" {
 		emailConfig.Subject = "GOMTP Test Subject"
 	}
-	if emailConfig.Body == "" {
-		emailConfig.Body = "This is the test email sent by gomtp."
-	}
 	if emailConfig.To == "" {
 		emailConfig.To = "to@example.com"
 	}
+	if emailConfig.Body == "" {
+		emailConfig.Body = "This is the test email sent by gomtp."
+	}
+}
 
-	// Read the email body from stdin if provided
-	stdIOBody := false
+func readBodyFromStdin() (string, error) {
 	stdinInfo, _ := os.Stdin.Stat()
 	if (stdinInfo.Mode() & os.ModeCharDevice) == 0 {
-		body, err := io.ReadAll(os.Stdin)
+		stdioBody, err := io.ReadAll(os.Stdin)
 		if err != nil {
-			return err
+			return "", err
 		}
-		emailConfig.Body = string(body)
-		stdIOBody = true
+		return string(stdioBody), nil
 	}
+	return "", nil
+}
 
-	// Validate body input
+// check --body, --body-file and stdio for email body
+func setBody(emailConfig *EmailConfig, stdioBody string) error {
 	bodySourceCount := 0
-	if stdIOBody {
+
+	if stdioBody != "" {
 		bodySourceCount++
+		emailConfig.Body = stdioBody
 	}
 	if emailBody != "" {
 		bodySourceCount++
+		emailConfig.Body = emailBody
 	}
 	if emailBodyFile != "" {
 		bodySourceCount++
-	}
-
-	if bodySourceCount > 1 {
-		return fmt.Errorf("cannot specify body via multiple sources simultaneously")
-	}
-
-	if emailBodyFile != "" {
-		// Read the email body from file if emailBodyFile is provided
 		body, err := os.ReadFile(emailBodyFile)
 		if err != nil {
 			return err
 		}
 		emailConfig.Body = string(body)
-	} else if emailBody != "" {
-		emailConfig.Body = emailBody
 	}
+	if bodySourceCount > 1 {
+		return fmt.Errorf("cannot specify body via multiple sources simultaneously")
+	}
+	return nil
+}
 
-	// Set values from flags
+// Set values from global flags
+func setFlags(emailConfig *EmailConfig) {
 	if emailTo != "" {
 		emailConfig.To = emailTo
 	}
 	if emailSubject != "" {
 		emailConfig.Subject = emailSubject
 	}
+}
 
-	// Create the email message
+// Create email message from config
+func createEmailMessage(emailConfig *EmailConfig) *gomail.Message {
 	m := gomail.NewMessage()
 	m.SetHeader("From", emailConfig.From)
 	m.SetHeader("To", emailConfig.To)
 	m.SetHeader("Subject", emailConfig.Subject)
 	m.SetBody("text/plain", emailConfig.Body)
+	return m
+}
 
+func sendEmail(emailConfig *EmailConfig, m *gomail.Message) error {
 	// Dial to the SMTP server
 	d := gomail.NewDialer(emailConfig.Host, emailConfig.Port, emailConfig.Username, emailConfig.Password)
 
-	// Enable SSL and TLS
+	// Enable SSL/TLS
 	d.SSL = emailConfig.SSL
 
 	tlsConfig := &tls.Config{
@@ -148,7 +185,6 @@ func rootRun(cmd *cobra.Command, args []string) error {
 	if err := d.DialAndSend(m); err != nil {
 		return err
 	}
-	cmd.Printf("Email sent successfully!")
 	return nil
 }
 
