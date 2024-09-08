@@ -19,6 +19,7 @@ type MailhogResponse struct {
 type MailhogMessage struct {
 	From    MailhogAddress   `json:"From"`
 	To      []MailhogAddress `json:"To"`
+	Cc      []MailhogAddress `json:"Cc"`
 	Subject string           `json:"Subject"`
 	Snippet string           `json:"Snippet"`
 }
@@ -468,4 +469,155 @@ func (suite *TestGOMTPSuite) TestBodyFileAndBodyFlag() {
 
 	expected := "cannot specify body via multiple sources simultaneously"
 	suite.Contains(b.String(), expected, "unexpected command output")
+}
+
+func (suite *TestGOMTPSuite) TestSingleCcFlag() {
+	resetFlags()
+	suite.cmd.SetArgs([]string{
+		"--file", "../tests/gomtpYamls/successConfiguration.yaml",
+		"--to", "singlecctarget@example.com",
+		"--subject", "Test Single CC Flag",
+		"--body", "This is a test email with a single cc.",
+		"--cc", "cc1@example.com",
+	})
+
+	b := bytes.NewBufferString("")
+	suite.cmd.SetOut(b)
+	suite.cmd.SetErr(b)
+	err := suite.cmd.Execute()
+
+	suite.NoError(err)
+
+	expected := "Email sent successfully!"
+	suite.Equal(expected, b.String())
+
+	latestMessage, err := getLatestMessageForRecipient("singlecctarget@example.com")
+	suite.NoError(err)
+	suite.Equal("Test Single CC Flag", latestMessage.Subject)
+	suite.Equal("from@example.com", latestMessage.From.Address)
+	suite.Equal("singlecctarget@example.com", latestMessage.To[0].Address)
+	suite.Equal("cc1@example.com", latestMessage.Cc[0].Address)
+}
+
+func (suite *TestGOMTPSuite) TestMultipleCcFlag() {
+	resetFlags()
+	suite.cmd.SetArgs([]string{
+		"--file", "../tests/gomtpYamls/successConfiguration.yaml",
+		"--to", "singlecctarget@example.com",
+		"--subject", "Test Single CC Flag",
+		"--body", "This is a test email with a single cc.",
+		"--cc", "multicc1@example.com",
+		"--cc", "multicc2@example.com",
+		"--cc", "multicc3@example.com",
+	})
+
+	b := bytes.NewBufferString("")
+	suite.cmd.SetOut(b)
+	suite.cmd.SetErr(b)
+	err := suite.cmd.Execute()
+
+	suite.NoError(err)
+
+	expected := "Email sent successfully!"
+	suite.Equal(expected, b.String())
+
+	latestMessage, err := getLatestMessageForRecipient("singlecctarget@example.com")
+	suite.NoError(err)
+	suite.Equal("Test Single CC Flag", latestMessage.Subject)
+	suite.Equal("from@example.com", latestMessage.From.Address)
+	suite.Equal("singlecctarget@example.com", latestMessage.To[0].Address)
+	suite.Equal("multicc1@example.com", latestMessage.Cc[0].Address)
+	suite.Equal("multicc2@example.com", latestMessage.Cc[1].Address)
+	suite.Equal("multicc3@example.com", latestMessage.Cc[2].Address)
+}
+
+func (suite *TestGOMTPSuite) TestSingleCcYaml() {
+	resetFlags()
+	suite.cmd.SetArgs([]string{
+		"--file", "../tests/gomtpYamls/successConfigurationWithSingleCc.yaml",
+		"--to", "singlecctarget@example.com",
+		"--subject", "Test Single CC Flag",
+		"--body", "This is a test email with a single cc.",
+	})
+
+	b := bytes.NewBufferString("")
+	suite.cmd.SetOut(b)
+	suite.cmd.SetErr(b)
+	err := suite.cmd.Execute()
+
+	suite.NoError(err)
+
+	expected := "Email sent successfully!"
+	suite.Equal(expected, b.String())
+
+	latestMessage, err := getLatestMessageForRecipient("singlecctarget@example.com")
+	suite.NoError(err)
+	suite.Equal("Test Single CC Flag", latestMessage.Subject)
+	suite.Equal("from@example.com", latestMessage.From.Address)
+	suite.Equal("singlecctarget@example.com", latestMessage.To[0].Address)
+	suite.Equal("ccyaml1@example.com", latestMessage.Cc[0].Address)
+}
+
+func resetFlags() {
+	gomtpYamlPath = ""
+	emailTo = ""
+	emailSubject = ""
+	emailBody = ""
+	emailBodyFile = ""
+	ccList = []string{}
+}
+
+func (suite *TestGOMTPSuite) TestMultiCcYaml() {
+	resetFlags()
+	subject := "Test Multi CC Yaml"
+	to := "singlecctarget@example.com"
+	body := "This is a test email with a multiple cc via yaml."
+	suite.cmd.SetArgs([]string{
+		"--file", "../tests/gomtpYamls/successConfigurationWithMultiCc.yaml",
+		"--to", to,
+		"--subject", subject,
+		"--body", body,
+	})
+
+	b := bytes.NewBufferString("")
+	suite.cmd.SetOut(b)
+	suite.cmd.SetErr(b)
+	err := suite.cmd.Execute()
+
+	suite.NoError(err)
+
+	expected := "Email sent successfully!"
+	suite.Equal(expected, b.String())
+
+	latestMessage, err := getLatestMessageForRecipient(to)
+	suite.NoError(err)
+	suite.Equal(subject, latestMessage.Subject)
+	suite.Equal("from@example.com", latestMessage.From.Address)
+	suite.Equal(to, latestMessage.To[0].Address)
+	suite.Equal(body, latestMessage.Snippet)
+	suite.Equal("multiccyaml1@example.com", latestMessage.Cc[0].Address)
+	suite.Equal("multiccyaml2@example.com", latestMessage.Cc[1].Address)
+}
+
+func (suite *TestGOMTPSuite) TestInvalidCcYaml() {
+	resetFlags()
+	subject := "Test Invalid CC Yaml"
+	to := "invalidccyamltarget@example.com"
+	body := "This is a test email for invalid cc yaml."
+	suite.cmd.SetArgs([]string{
+		"--file", "../tests/gomtpYamls/invalidConfigurationWithCcString.yaml",
+		"--to", to,
+		"--subject", subject,
+		"--body", body,
+	})
+
+	b := bytes.NewBufferString("")
+	suite.cmd.SetOut(b)
+	suite.cmd.SetErr(b)
+	err := suite.cmd.Execute()
+	suite.Error(err)
+
+	expected := "yaml: unmarshal errors"
+	suite.Contains(b.String(), expected, "unexpected command output")
+
 }
