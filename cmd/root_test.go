@@ -472,6 +472,7 @@ func (suite *TestGOMTPSuite) TestBodyFileAndBodyFlag() {
 }
 
 func (suite *TestGOMTPSuite) TestSingleCcFlag() {
+	resetFlags()
 	suite.cmd.SetArgs([]string{
 		"--file", "../tests/gomtpYamls/successConfiguration.yaml",
 		"--to", "singlecctarget@example.com",
@@ -499,14 +500,15 @@ func (suite *TestGOMTPSuite) TestSingleCcFlag() {
 }
 
 func (suite *TestGOMTPSuite) TestMultipleCcFlag() {
+	resetFlags()
 	suite.cmd.SetArgs([]string{
 		"--file", "../tests/gomtpYamls/successConfiguration.yaml",
 		"--to", "singlecctarget@example.com",
 		"--subject", "Test Single CC Flag",
 		"--body", "This is a test email with a single cc.",
-		"--cc", "cc1@example.com",
-		"--cc", "cc2@example.com",
-		"--cc", "cc3@example.com",
+		"--cc", "multicc1@example.com",
+		"--cc", "multicc2@example.com",
+		"--cc", "multicc3@example.com",
 	})
 
 	b := bytes.NewBufferString("")
@@ -524,12 +526,13 @@ func (suite *TestGOMTPSuite) TestMultipleCcFlag() {
 	suite.Equal("Test Single CC Flag", latestMessage.Subject)
 	suite.Equal("from@example.com", latestMessage.From.Address)
 	suite.Equal("singlecctarget@example.com", latestMessage.To[0].Address)
-	suite.Equal("cc1@example.com", latestMessage.Cc[0].Address)
-	suite.Equal("cc2@example.com", latestMessage.Cc[1].Address)
-	suite.Equal("cc3@example.com", latestMessage.Cc[2].Address)
+	suite.Equal("multicc1@example.com", latestMessage.Cc[0].Address)
+	suite.Equal("multicc2@example.com", latestMessage.Cc[1].Address)
+	suite.Equal("multicc3@example.com", latestMessage.Cc[2].Address)
 }
 
 func (suite *TestGOMTPSuite) TestSingleCcYaml() {
+	resetFlags()
 	suite.cmd.SetArgs([]string{
 		"--file", "../tests/gomtpYamls/successConfigurationWithSingleCc.yaml",
 		"--to", "singlecctarget@example.com",
@@ -555,7 +558,17 @@ func (suite *TestGOMTPSuite) TestSingleCcYaml() {
 	suite.Equal("ccyaml1@example.com", latestMessage.Cc[0].Address)
 }
 
+func resetFlags() {
+	gomtpYamlPath = ""
+	emailTo = ""
+	emailSubject = ""
+	emailBody = ""
+	emailBodyFile = ""
+	ccList = []string{}
+}
+
 func (suite *TestGOMTPSuite) TestMultiCcYaml() {
+	resetFlags()
 	subject := "Test Multi CC Yaml"
 	to := "singlecctarget@example.com"
 	body := "This is a test email with a multiple cc via yaml."
@@ -587,6 +600,7 @@ func (suite *TestGOMTPSuite) TestMultiCcYaml() {
 }
 
 func (suite *TestGOMTPSuite) TestInvalidCcYaml() {
+	resetFlags()
 	subject := "Test Invalid CC Yaml"
 	to := "invalidccyamltarget@example.com"
 	body := "This is a test email for invalid cc yaml."
