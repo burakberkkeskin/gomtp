@@ -18,6 +18,7 @@ var emailTo string
 var emailSubject string
 var emailBody string
 var emailBodyFile string
+var ccList []string
 
 var version string
 var commitId string
@@ -102,6 +103,9 @@ func setupDefaultEmailConfig(emailConfig *EmailConfig) {
 	}
 	if emailConfig.Body == "" {
 		emailConfig.Body = "This is the test email sent by gomtp."
+	}
+	if len(ccList) > 0 {
+		emailConfig.CcList = ccList
 	}
 }
 
@@ -209,4 +213,6 @@ func init() {
 	rootCmd.Flags().StringVarP(&emailSubject, "subject", "s", "", "Subject of the email.")
 	rootCmd.Flags().StringVarP(&emailBody, "body", "b", "", "Body of the email.")
 	rootCmd.Flags().StringVar(&emailBodyFile, "body-file", "", "File that contains body of the email.")
+	rootCmd.Flags().StringSliceVar(&ccList, "cc", []string{}, "CC email address")
+
 }
