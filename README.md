@@ -109,6 +109,8 @@ Email sent successfully!
 
 - Open the `mailpit` web ui from http://127.0.0.1:8025 and see the sample email.
 
+<img width="1398" alt="MailHog UI" src="https://github.com/user-attachments/assets/22ebf6ad-5df9-4a78-a76c-c36c151cee9e" />
+
 ## Configure Once, Use For Anything
 
 If you want to use `gomtp` to send emails, you can configure a yaml and use it as base. For example, follow the use-case below: 
