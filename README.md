@@ -72,12 +72,6 @@ mkdir ~/gomtp
 cd ~/gomtp/ 
 ```
 
-- Set the gomtp binary permissions
-
-```bash
-sudo chmod +x /usr/local/bin/gomtp
-```
-
 - Download the sample docker-compose.yaml
 
 ```bash
