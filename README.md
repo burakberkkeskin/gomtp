@@ -72,13 +72,6 @@ mkdir ~/gomtp
 cd ~/gomtp/ 
 ```
 
-- Download the gomtp binary to the system
-
-```bash
-sudo curl -L -o /usr/local/bin/gomtp "https://github.com/burakberkkeskin/gomtp/releases/latest/download/gomtp-$(uname -s)-$(uname -m)"
-```
-
-
 - Set the gomtp binary permissions
 
 ```bash
