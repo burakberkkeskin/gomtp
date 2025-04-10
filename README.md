@@ -56,20 +56,65 @@ gomtp -f test.yaml
 
 ## Sample SMTP For Testing
 
-- To test the `gomtp` quickly, you can run the `mailhog` from `docker-compose.yml`
+To test the `gomtp` quickly, you can run the `mailpit` from `docker-compose.yml`
+
+- Install the `gomtp` by checking the [Install](#install) section.
+
+- Create a separate directory for config files
+
+```bash
+mkdir ~/gomtp 
+```
+
+- Change directory
+
+```bash
+cd ~/gomtp/ 
+```
+
+- Download the gomtp binary to the system
+
+```bash
+sudo curl -L -o /usr/local/bin/gomtp "https://github.com/burakberkkeskin/gomtp/releases/latest/download/gomtp-$(uname -s)-$(uname -m)"
+```
+
+
+- Set the gomtp binary permissions
+
+```bash
+sudo chmod +x /usr/local/bin/gomtp
+```
+
+- Download the sample docker-compose.yaml
+
+```bash
+curl -LO https://raw.githubusercontent.com/burakberkkeskin/gomtp/refs/heads/master/docker-compose.yaml
+```
+
+- Download the sample gomtp.yaml configuration.
+  - The default `gomtp.yaml` file already has been configured for the `mailpit`.
+
+```bash
+curl -LO https://raw.githubusercontent.com/burakberkkeskin/gomtp/refs/heads/master/gomtp.yaml
+```
+
+- Start the mailpit.
 
 ```bash
 docker compose up -d
 ```
 
-- Configure `gomtp.yaml`
-  - The default `gomtp.yaml` file has been configured for the mailhog.
-- Open the `mailhog` web ui from http://127.0.0.1:8025
-- Run the `gomtp`.
+- Test the gomtp
 
 ```bash
 gomtp
 ```
+
+```output
+Email sent successfully!
+```
+
+- Open the `mailpit` web ui from http://127.0.0.1:8025 and see the sample email.
 
 ## Configure Once, Use For Anything
 
