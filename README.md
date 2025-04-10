@@ -72,13 +72,6 @@ mkdir ~/gomtp
 cd ~/gomtp/ 
 ```
 
-- Download the gomtp binary to the system
-
-```bash
-sudo curl -L -o /usr/local/bin/gomtp "https://github.com/burakberkkeskin/gomtp/releases/latest/download/gomtp-$(uname -s)-$(uname -m)"
-```
-
-
 - Set the gomtp binary permissions
 
 ```bash
@@ -117,7 +110,6 @@ Email sent successfully!
 - Open the `mailpit` web ui from http://127.0.0.1:8025 and see the sample email.
 
 <img width="1398" alt="MailHog UI" src="https://github.com/user-attachments/assets/22ebf6ad-5df9-4a78-a76c-c36c151cee9e" />
-
 
 ## Configure Once, Use For Anything
 
