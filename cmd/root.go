@@ -1,11 +1,15 @@
 package cmd
 
 import (
+	"bytes"
 	"crypto/tls"
 	"fmt"
 	"io"
+	"net"
 	"net/smtp"
 	"os"
+	"strconv"
+	"time"
 
 	"github.com/spf13/cobra"
 	"gopkg.in/gomail.v2"
@@ -18,6 +22,7 @@ var emailTo string
 var emailSubject string
 var emailBody string
 var emailBodyFile string
+var debug bool
 var ccList []string
 
 var version string
@@ -171,28 +176,151 @@ func createEmailMessage(emailConfig *EmailConfig) *gomail.Message {
 }
 
 func sendEmail(emailConfig *EmailConfig, m *gomail.Message) error {
-	// Dial to the SMTP server
-	d := gomail.NewDialer(emailConfig.Host, emailConfig.Port, emailConfig.Username, emailConfig.Password)
-
-	// Enable SSL/TLS
-	d.SSL = emailConfig.SSL
-
-	tlsConfig := &tls.Config{
-		ServerName:         emailConfig.Host,
-		InsecureSkipVerify: emailConfig.VerifyCertificate,
-	}
-	d.TLSConfig = tlsConfig
-
-	// Authenticate with the server using the specified method
-	switch emailConfig.Auth {
-	case "LOGIN":
-		d.Auth = smtp.PlainAuth("", emailConfig.Username, emailConfig.Password, emailConfig.Host)
+	// Validate mode selection
+	if emailConfig.SSL && emailConfig.TLS {
+		return fmt.Errorf("invalid configuration: both SSL and TLS (STARTTLS) are enabled; choose only one")
 	}
 
-	// Send the email
-	if err := d.DialAndSend(m); err != nil {
+	// Render message to bytes once
+	var msgBuf bytes.Buffer
+	if _, err := m.WriteTo(&msgBuf); err != nil {
 		return err
 	}
+
+	// Common
+	addr := net.JoinHostPort(emailConfig.Host, strconv.Itoa(emailConfig.Port))
+	tlsConfig := &tls.Config{
+		ServerName:         emailConfig.Host,
+		InsecureSkipVerify: !emailConfig.VerifyCertificate,
+	}
+
+	if debug {
+		fmt.Fprintf(os.Stderr, "[gomtp][debug] host=%s port=%d ssl=%t starttls=%t auth=%s verifyCert=%t\n", emailConfig.Host, emailConfig.Port, emailConfig.SSL, emailConfig.TLS, emailConfig.Auth, emailConfig.VerifyCertificate)
+	}
+
+	// Connect
+	var (
+		conn net.Conn
+		c    *smtp.Client
+		err  error
+	)
+
+	if emailConfig.SSL {
+		if debug {
+			fmt.Fprintf(os.Stderr, "[gomtp][debug] selected_mode=ssl_implicit\n")
+		}
+		conn, err = tls.Dial("tcp", addr, tlsConfig)
+		if err != nil {
+			return err
+		}
+		defer conn.Close()
+		// Log TLS parameters for implicit TLS
+		if debug {
+			if st := conn.(*tls.Conn).ConnectionState(); true {
+				fmt.Fprintf(os.Stderr, "[gomtp][debug] negotiated_tls=version:%x cipher_suite:%x server_name=%s\n", st.Version, st.CipherSuite, st.ServerName)
+				if len(st.PeerCertificates) > 0 {
+					cert := st.PeerCertificates[0]
+					fmt.Fprintf(os.Stderr, "[gomtp][debug] cert_subject=%s issuer=%s not_before=%s not_after=%s dns_names=%v\n",
+						cert.Subject.String(), cert.Issuer.String(), cert.NotBefore.Format(time.RFC3339), cert.NotAfter.Format(time.RFC3339), cert.DNSNames)
+				}
+			}
+		}
+		c, err = smtp.NewClient(conn, emailConfig.Host)
+		if err != nil {
+			return err
+		}
+	} else {
+		if emailConfig.TLS {
+			if debug {
+				fmt.Fprintf(os.Stderr, "[gomtp][debug] selected_mode=starttls\n")
+			}
+		} else {
+			if debug {
+				fmt.Fprintf(os.Stderr, "[gomtp][debug] selected_mode=plain_no_tls\n")
+			}
+		}
+		conn, err = net.Dial("tcp", addr)
+		if err != nil {
+			return err
+		}
+		defer conn.Close()
+		c, err = smtp.NewClient(conn, emailConfig.Host)
+		if err != nil {
+			return err
+		}
+	}
+	defer c.Quit()
+
+	// EHLO/HELO
+	if err := c.Hello(emailConfig.Host); err != nil {
+		return err
+	}
+
+	// STARTTLS if requested
+	if emailConfig.TLS {
+		if ok, _ := c.Extension("STARTTLS"); !ok {
+			return fmt.Errorf("server does not support STARTTLS")
+		}
+		if err := c.StartTLS(tlsConfig); err != nil {
+			return err
+		}
+		if debug {
+			if st, ok := c.TLSConnectionState(); ok {
+				fmt.Fprintf(os.Stderr, "[gomtp][debug] negotiated_tls=version:%x cipher_suite:%x server_name=%s\n", st.Version, st.CipherSuite, st.ServerName)
+				if len(st.PeerCertificates) > 0 {
+					cert := st.PeerCertificates[0]
+					fmt.Fprintf(os.Stderr, "[gomtp][debug] cert_subject=%s issuer=%s not_before=%s not_after=%s dns_names=%v\n",
+						cert.Subject.String(), cert.Issuer.String(), cert.NotBefore.Format(time.RFC3339), cert.NotAfter.Format(time.RFC3339), cert.DNSNames)
+				}
+			}
+		}
+	}
+
+	// AUTH if configured and supported
+	if emailConfig.Auth == "LOGIN" {
+		if ok, _ := c.Extension("AUTH"); ok {
+			a := smtp.PlainAuth("", emailConfig.Username, emailConfig.Password, emailConfig.Host)
+			if err := c.Auth(a); err != nil {
+				return err
+			}
+		} else if debug {
+			fmt.Fprintf(os.Stderr, "[gomtp][debug] server does not advertise AUTH; skipping auth\n")
+		}
+	}
+
+	// MAIL FROM
+	if err := c.Mail(emailConfig.From); err != nil {
+		return err
+	}
+
+	// RCPT TO (To + Cc)
+	recipients := make([]string, 0, 1+len(emailConfig.CcList))
+	if emailConfig.To != "" {
+		recipients = append(recipients, emailConfig.To)
+	}
+	recipients = append(recipients, emailConfig.CcList...)
+	for _, rcpt := range recipients {
+		if rcpt == "" {
+			continue
+		}
+		if err := c.Rcpt(rcpt); err != nil {
+			return err
+		}
+	}
+
+	// DATA
+	wc, err := c.Data()
+	if err != nil {
+		return err
+	}
+	if _, err := wc.Write(msgBuf.Bytes()); err != nil {
+		_ = wc.Close()
+		return err
+	}
+	if err := wc.Close(); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -214,5 +342,6 @@ func init() {
 	rootCmd.Flags().StringVarP(&emailBody, "body", "b", "", "Body of the email.")
 	rootCmd.Flags().StringVar(&emailBodyFile, "body-file", "", "File that contains body of the email.")
 	rootCmd.Flags().StringSliceVar(&ccList, "cc", []string{}, "CC email address")
+	rootCmd.Flags().BoolVar(&debug, "debug", false, "Enable verbose SMTP/TLS debugging output.")
 
 }
